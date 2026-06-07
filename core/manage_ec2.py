@@ -37,6 +37,24 @@ class ManageEc2:
             logging.error(f"No se encontraron las crendenciales de AWS.")
             return False,"No se encontraron credenciales"
 
+    def verify_identity(self):
+        """
+        Creamos cliente de STS para validar credenciales, antes de ejecutar
+        metodos que llaman a la API de AWS.
+        """
+
+        try:
+            sts = boto3.client("sts")
+
+            response = sts.get_caller_identity()
+
+            return True,response
+
+        except NoCredentialsError:
+            return False,"No se encontraron credenciales de AWS"
+
+        except ClientError as e:
+            return False, e
 
     def run_ec2(self,config:dict):
 
@@ -185,11 +203,13 @@ class ManageEc2:
     def preparative(self):
 
         response = self.describe_ec2()
-        if response:
 
-            return self.preparate_data_ec2(response)
+        if not response:
+            return None,None
+
+        return self.preparate_data_ec2(response)
         
-        return None,None
+        
 
     def waiter_for_state(self,instance_id,target_state):
      

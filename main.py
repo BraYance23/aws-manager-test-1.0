@@ -383,16 +383,25 @@ def main():
 
     while True:
 
+
         manager = ManagerAWS()
         print(Fore.GREEN +"Validando credenciales..")
         print("Conectando con AWS...")
         time.sleep(4)
-        print("Conexion exitosa" + Style.RESET_ALL)
+        flag,code = manager.ADMIN_EC2.verify_identity()
+
+        if not flag:
+            helpers.handle_aws_error(flag,code)
+            return
+        print("conexion exitosa :D" + Style.RESET_ALL)
+        account_id = code["Account"]
+        arn = code["Arn"]
         
         while True:
 
-            print(Fore.BLUE + f"Estas operando sobre la region : {manager.region_name}" + Style.RESET_ALL)
             print(f"Bienvenido a Manage AWS \n")
+            print(f"ID  de la cuenta : {account_id}\tARN : {arn}")
+            print(Fore.WHITE + f"Estas operando sobre la region : {manager.region_name}" + Style.RESET_ALL)
 
             options_aws = data_ec2.main_aws
             for clave,valor in options_aws.items():
