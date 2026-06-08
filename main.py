@@ -27,9 +27,10 @@ class ManagerAWS:
         if not flag:
             helpers.handle_aws_error(flag,code)
             return
+
         
         print(Fore.CYAN + Style.BRIGHT + "-Desplegando instancia...")
-        time.sleep(8)
+        self.ADMIN_EC2.waiter_for_state(code,"running")
         print("instancia desplegada correctamente.🚀" + Style.RESET_ALL)
     
     def init_ec2(self):
@@ -56,6 +57,9 @@ class ManagerAWS:
     def show_instances(self):
 
         dict_ec2_id,filas_tabulate = self.ADMIN_EC2.preparative()
+
+        if not dict_ec2_id:
+            helpers.handle_aws_error(dict_ec2_id,filas_tabulate)
 
         if not filas_tabulate:
             print("No hay instancias existentes en esta region.")
@@ -414,8 +418,8 @@ class ManagerAWS:
         while True:
 
             option_sg = data_ec2.main_sg
-            print( Fore.BLUE + f"Estas operando sobre grupo de seguridad : {self.ADMIN_SG.sg_id} \n" + Style.RESET_ALL)
             print("Manage Security Groups")
+            print( f"Estas operando sobre grupo de seguridad : {Style.BRIGHT + self.ADMIN_SG.sg_id + Style.RESET_ALL} \n")
 
             for clave,valor in option_sg.items():
 
@@ -478,15 +482,15 @@ def main():
             helpers.handle_aws_error(flag,code)
             return
 
-        account_id = code.get("Account")
-        arn = code.get("Arn")
+        matriz_dasboard = [[code.get("Account"),code.get("Arn"),manager.region_name]]
+        header = data_ec2.header_dashboard["header"]
+        title = data_ec2.header_dashboard["title"]
         print(Fore.GREEN + "conexion exitosa :D" + Style.RESET_ALL)
 
         while True:
 
-            print(f"Bienvenido a Manage AWS \n")
-            print(f"ID  de la cuenta : {Style.BRIGHT + account_id + Style.RESET_ALL}")
-            print(f"ARN : {Style.BRIGHT + arn + Style.RESET_ALL}")
+            print(f"\tBienvenido a Manage AWS \n")
+            helpers.display_table(matriz_dasboard,header,title)
             print(f"Estas operando sobre la region : {Style.BRIGHT + manager.region_name + Style.RESET_ALL}\n")
 
             options_aws = data_ec2.main_aws

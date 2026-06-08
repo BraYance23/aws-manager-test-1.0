@@ -176,7 +176,7 @@ def handle_aws_error(flag,code):
 def confirmation():
 
     while True:
-        choice = input("Esta acción es irreversible, desea continuar S/N: ").strip().lower()
+        choice = input(Fore.RED + "Esta acción es irreversible, desea continuar S/N: "+ Style.RESET_ALL).strip().lower()
 
         if "s" != choice != "n":
             print("Valor ingresado no valido, por favor confirmar operacion.")

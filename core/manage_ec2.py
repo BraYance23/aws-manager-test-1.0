@@ -20,12 +20,12 @@ class ManageEc2:
             print("No se encontraron las credenciales de AWS. Configura tu ~/.aws/credentials")
             return
 
-    def describe_ec2(self):
+    def describe_ec2(self)-> bool|str:
 
         try:
     
             response = self.ec2.describe_instances()
-            return response
+            return True,response
 
         except ClientError as e:
 
@@ -37,7 +37,7 @@ class ManageEc2:
             logging.error(f"No se encontraron las crendenciales de AWS.")
             return False,"No se encontraron credenciales"
 
-    def verify_identity(self):
+    def verify_identity(self)-> bool|str:
         """
         Creamos cliente de STS para validar credenciales, antes de ejecutar
         metodos que llaman a la API de AWS.
@@ -83,7 +83,7 @@ class ManageEc2:
                 ]
             )
 
-            return True,response
+            return True,response.get("Instances")[0].get("InstanceId")
 
         except ClientError as e:
             code = e.response["Error"]["Code"]
@@ -93,6 +93,8 @@ class ManageEc2:
         except NoCredentialsError:
             logging.error("No se encontraron credendiales de AWS.")
             return False,"No se encontraron credenciales"
+        
+
     def init_ec2(self,instance_id):
 
         try:
@@ -161,7 +163,7 @@ class ManageEc2:
             logging.error("No se encontraron credenciales de AWS.")
             return False,"No se encontraron credenciales"
 
-    def preparate_data_ec2(self,response):
+    def format_data_ec2(self,response):
 
         filas_tabulate = []
         dict_id_ec2 = {}
@@ -177,16 +179,9 @@ class ManageEc2:
                 nombre = "Sin nombre"
                 for tag in instance.get("Tags",[]):
 
-
                     if tag.get("Key") == "Name":
-
                         nombre = tag.get("Value","Sin Nombre")
                         break
-
-                for net_interfaces in instance["NetworkInterfaces"]:
-                    
-                    for groups in net_interfaces["Groups"]:
-                        sg_id = groups.get("GroupId")
 
             filas_tabulate.append([indice,
                                    nombre,
@@ -194,7 +189,6 @@ class ManageEc2:
                                    instance["State"].get("Name"),
                          instance.get("Architecture"),instance.get("InstanceId"),
                          instance.get("PublicIpAddress","Sin ip publica"),
-                         sg_id,
                          fecha_formateada
                          ])
         return dict_id_ec2,filas_tabulate
@@ -202,12 +196,12 @@ class ManageEc2:
 
     def preparative(self):
 
-        response = self.describe_ec2()
+        flag,code = self.describe_ec2()
 
-        if not response:
-            return None,None
+        if not flag:
+            return flag,code
 
-        return self.preparate_data_ec2(response)
+        return self.format_data_ec2(code)
         
         
 

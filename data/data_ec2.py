@@ -87,8 +87,11 @@ header_region_name = {"header" :["INDICE",
                                      "Region ID"],
                      "title": "Regiones disponibles para administrar"}
 
+header_dashboard = {"header": [Style.BRIGHT+"Account ID","ARN","Region Name" + Style.RESET_ALL],
+                    "title": "Datos asociados a su cuenta de AWS"}
 
-header_key_pair = {"header" : [Style.BRIGHT + Fore.CYAN + "ID list",
+
+header_key_pair = {"header" : [Style.BRIGHT + "ID list",
                       Style.BRIGHT + Fore.CYAN + "Key name",
                       Style.BRIGHT + Fore.CYAN + "Key Pair ID",
                       Style.BRIGHT + Fore.CYAN +"Create Time" + Style.RESET_ALL],
@@ -113,7 +116,7 @@ header_ec2 = {"header" : [Style.BRIGHT +"INDICE",
                           "Tipo de instancia",
                           "Estado","Arquitectura",
                           "ID instancia",
-                          "IP publica","SG ID",
+                          "IP publica",
                           "Fecha de lanzamiento" +Style.RESET_ALL],
             "title": "listado y descripcion de instancias :"}
 
