@@ -10,8 +10,8 @@ import time
 
 class ManagerAWS:
 
-    def __init__(self):
-        self.region_name = helpers.select_region_name()
+    def __init__(self,region_name="us-east-1"):
+        self.region_name = region_name
         self.ADMIN_EC2 = ManageEc2(self.region_name)
         self.ADMIN_AMI = ManageAmi(self.region_name)
         self.ADMIN_KEY = ManageKeyPairs(self.region_name)
@@ -378,124 +378,140 @@ class ManagerAWS:
             "MaxCount": max_count
         }
 
+#MENUS DE ORQUESTADORES
+    def ec2_menu(self):
+
+        while True:
+
+            options_ec2 =  data_ec2.main_ec2
+
+            print("Manage EC2\n")
+            for clave,valor in options_ec2.items():
+                print(f"\t{clave}-{valor}")
+
+            choice_ec2 = helpers.choice_main(options_ec2)
+
+            match choice_ec2:
+
+                case "1":
+                    self.show_instances()
+                    input("Presione enter para continuar")
+                case "2":
+                    self.run_ec2()
+                case "3":
+                    self.init_ec2()
+                case "4":
+                    self.reboot_ec2()
+                case "5":
+                    self.stop_ec2()
+                case "6":
+                    self.terminate_ec2()
+                case "7":
+                    break
+
+    def sg_menu(self):
+
+        while True:
+
+            option_sg = data_ec2.main_sg
+            print( Fore.BLUE + f"Estas operando sobre grupo de seguridad : {self.ADMIN_SG.sg_id} \n" + Style.RESET_ALL)
+            print("Manage Security Groups")
+
+            for clave,valor in option_sg.items():
+
+                print(f"\t{clave}-{valor}")
+
+            choice_sg = helpers.choice_main(option_sg)
+
+            match choice_sg:
+
+                case "1":
+                    self.show_rules_sg()
+                    input("Presione enter para continuar.")
+                case "2":
+                    self.autorize_sg_ingress()
+                case "3":
+                    self.revoke_sg_ingress()
+                case "4":
+                    self.change_sg_id()
+                case "5":
+                    break
+
+    def kp_menu(self):
+        
+        while True:
+
+            options_key_pair = data_ec2.main_key_pair
+                        
+            print("Manage Key Pairs\n")
+            for clave,valor in options_key_pair.items():
+                print(f"\t{clave}-{valor}")
+
+            choice_key_pair = helpers.choice_main(options_key_pair)
+
+            match choice_key_pair:
+
+                case "1":
+                    self.show_key_pairs()
+                    input("Presione enter para continuar.")
+                case "2":
+                    self.generate_key_pairs()
+                case "3":
+                    self.delete_key_pairs()
+                case "4":
+                    break
+
+
 def main():
-
-
+        
     while True:
-
-
-        manager = ManagerAWS()
+        region_name = helpers.select_region_name()
+        manager = ManagerAWS(region_name)
         print(Fore.GREEN +"Validando credenciales..")
-        print("Conectando con AWS...")
+        print("Conectando con AWS..." + Style.RESET_ALL)
         time.sleep(4)
+
+            
         flag,code = manager.ADMIN_EC2.verify_identity()
 
         if not flag:
             helpers.handle_aws_error(flag,code)
             return
-        print("conexion exitosa :D" + Style.RESET_ALL)
-        account_id = code["Account"]
-        arn = code["Arn"]
-        
+
+        account_id = code.get("Account")
+        arn = code.get("Arn")
+        print(Fore.GREEN + "conexion exitosa :D" + Style.RESET_ALL)
+
         while True:
 
             print(f"Bienvenido a Manage AWS \n")
-            print(f"ID  de la cuenta : {account_id}\tARN : {arn}")
-            print(Fore.WHITE + f"Estas operando sobre la region : {manager.region_name}" + Style.RESET_ALL)
+            print(f"ID  de la cuenta : {Style.BRIGHT + account_id + Style.RESET_ALL}")
+            print(f"ARN : {Style.BRIGHT + arn + Style.RESET_ALL}")
+            print(f"Estas operando sobre la region : {Style.BRIGHT + manager.region_name + Style.RESET_ALL}\n")
 
             options_aws = data_ec2.main_aws
+
+            print("_" * 30)
             for clave,valor in options_aws.items():
-                print(f"\t{clave}-{valor}")
+
+                print(f"|{clave}-{valor}")
+            print("-" * 30)
 
             choice_aws = helpers.choice_main(options_aws)
 
             match choice_aws:
 
                 case "1":
-
-                    while True:
-
-                        options_ec2 =  data_ec2.main_ec2
-
-                        print("Manage EC2\n")
-                        for clave,valor in options_ec2.items():
-                            print(f"\t{clave}-{valor}")
-
-                        choice_ec2 = helpers.choice_main(options_ec2)
-
-                        match choice_ec2:
-
-                            case "1":
-                                manager.show_instances()
-                                input("Presione enter para continuar")
-                            case "2":
-                                manager.run_ec2()
-                            case "3":
-                                manager.init_ec2()
-                            case "4":
-                                manager.reboot_ec2()
-                            case "5":
-                                manager.stop_ec2()
-                            case "6":
-                                manager.terminate_ec2()
-                            case "7":
-                                break
+                    manager.ec2_menu()
                 case "2":
                     manager.change_sg_id()
-
-                    while True:
-
-                        option_sg = data_ec2.main_sg
-                        print( Fore.BLUE + f"Estas operando sobre grupo de seguridad : {manager.ADMIN_SG.sg_id} \n" + Style.RESET_ALL)
-                        print("Manage Security Groups")
-
-                        for clave,valor in option_sg.items():
-
-                            print(f"\t{clave}-{valor}")
-
-                        choice_sg = helpers.choice_main(option_sg)
-
-                        match choice_sg:
-
-                            case "1":
-                                manager.show_rules_sg()
-                                input("Presione enter para continuar.")
-                            case "2":
-                                manager.autorize_sg_ingress()
-                            case "3":
-                                manager.revoke_sg_ingress()
-                            case "4":
-                                manager.change_sg_id()
-                            case "5":
-                                break
+                    manager.sg_menu()
                 case "3":
-
-                    while True:
-
-                        options_key_pair = data_ec2.main_key_pair
-                        
-                        print("Manage Key Pairs\n")
-                        for clave,valor in options_key_pair.items():
-                            print(f"\t{clave}-{valor}")
-
-                        choice_key_pair = helpers.choice_main(options_key_pair)
-
-                        match choice_key_pair:
-
-                            case "1":
-                                manager.show_key_pairs()
-                                input("Presione enter para continuar.")
-                            case "2":
-                                manager.generate_key_pairs()
-                            case "3":
-                                manager.delete_key_pairs()
-                            case "4":
-                                break
+                    manager.kp_menu()
                 case "4":
                     break
-
                 case "5":
-                    print(Fore.GREEN + Style.BRIGHT + ":D Hasta pronto..." + Style.RESET_ALL)
+                    print(Fore.GREEN + ":D Hasta pronto..." + Style.RESET_ALL)
                     return
                        
                     
