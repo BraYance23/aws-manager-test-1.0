@@ -4,6 +4,8 @@ from pathlib import Path
 import logging
 
 
+logger = logging.getLogger(__name__)
+
 class ManageKeyPairs:
 
     def __init__(self,region_name = "us-east-1"):
@@ -11,29 +13,25 @@ class ManageKeyPairs:
         self.ec2 = boto3.client("ec2",region_name = self.region_name)
 
 
-    def request_key_pairs(self):
+    def request_key_pairs(self)-> tuple[bool,dict | str]:
 
         try:
             response = self.ec2.describe_key_pairs()
             return True,response
             
         except ClientError as e:
-
             code = e.response["Error"]["Code"]
-            logging.error(f"Error : al intentar describe_key_pairs() : {code}")
-
             return False,code
         
         except NoCredentialsError:
-            logging.error("No se encontraron las credenciales de AWS.")
             return False,"No se encontraron credenciales"
       
-    def prepare_data(self,keys):
+    def prepare_data(self,response:dict)-> tuple[dict,list]:
         
         filas_tabulate = []
         dict_key_id = {}
 
-        for indice,key in enumerate(keys["KeyPairs"],start=1):
+        for indice,key in enumerate(response["KeyPairs"],start=1):
 
             fecha = key.get("CreateTime")
             fecha_formateada = fecha.strftime("%Y/%m/%d %H:%M:%S")
@@ -49,7 +47,7 @@ class ManageKeyPairs:
     
         return dict_key_id,filas_tabulate
 
-    def generate_key_pair(self, key_name):
+    def generate_key_pair(self, key_name:str)-> tuple[bool,str]:
 
         try:
             response = self.ec2.create_key_pair(KeyName=key_name)
@@ -59,14 +57,12 @@ class ManageKeyPairs:
         
         except ClientError as e:
             code = e.response["Error"]["Code"]
-            logging.error(f"Error al intentar generar key pair : {code}")
             return False,code
 
         except NoCredentialsError as error:
-            logging.error("No se encontraron las credenciales de aws")
             return False,"No se encontraron credenciales"
             
-    def request_name_key(self):
+    def request_name_key(self)-> str:
 
         while True:
         
@@ -77,21 +73,19 @@ class ManageKeyPairs:
             
             print("No se puede crear una llave sin nombre")
             
-    def save_key_pair(self,private_key,key_name):
+    def save_key_pair(self,private_key:str,key_name:str)-> tuple[bool,Path | str]:
 
         try:
             key_path = Path.home()/".ssh"/f"{key_name}.pem"
             key_path.parent.mkdir(parents=True,exist_ok=True)
             key_path.write_text(private_key)
             key_path.chmod(0o600)
-
             return True,key_path
 
         except Exception as error:
-            logging.error(f"Error al guardar llave : {error}")
             return False,"ErrorSaveKey"
 
-    def delete_key_pair(self,key_delete):
+    def delete_key_pair(self,key_delete:str)-> tuple[bool,str]:
 
         try:
             self.ec2.delete_key_pair(KeyName=key_delete)
@@ -99,11 +93,9 @@ class ManageKeyPairs:
 
         except ClientError as error:
             code = error.response["Error"]["Code"]
-            logging.error(f"Error al intemtar eliminar key pair : {code}")
             return False,code
         
         except NoCredentialsError:
-            logging.error("No se encontraron credenciales en AWS.")
             return False,"No se encontraron credenciales"
 
 

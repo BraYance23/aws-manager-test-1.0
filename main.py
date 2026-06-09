@@ -4,9 +4,16 @@ from core.manage_key_pair import ManageKeyPairs
 from core.manage_sg import ManageSecurityGroup
 from data import data_ec2
 from ui import helpers
+import logging
 from colorama import init,Style,Fore
 import time
 
+
+logger = logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    filename="app.log"
+)
 
 class ManagerAWS:
 
@@ -20,18 +27,20 @@ class ManagerAWS:
 #Instancias:
 
     def run_ec2(self):
-
+        
         config_instace = self.request_date_run_instance()
         flag,code = self.ADMIN_EC2.run_ec2(config_instace)
 
         if not flag:
             helpers.handle_aws_error(flag,code)
+            logger.error(f"Error al lanzar instancia : {code}")
             return
 
-        
+        logger.info(f"Deploy EC2, ID : {code}")
         print(Fore.CYAN + Style.BRIGHT + "-Desplegando instancia...")
         self.ADMIN_EC2.waiter_for_state(code,"running")
         print("instancia desplegada correctamente.🚀" + Style.RESET_ALL)
+        
     
     def init_ec2(self):
 
@@ -489,9 +498,8 @@ def main():
 
         while True:
 
-            print(f"\tBienvenido a Manage AWS \n")
+            print(Style.BRIGHT + f"\tBienvenido a Manage AWS \n" + Style.RESET_ALL)
             helpers.display_table(matriz_dasboard,header,title)
-            print(f"Estas operando sobre la region : {Style.BRIGHT + manager.region_name + Style.RESET_ALL}\n")
 
             options_aws = data_ec2.main_aws
 

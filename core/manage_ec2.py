@@ -3,41 +3,31 @@ from botocore.exceptions import ClientError,NoCredentialsError
 import logging
 
 
+logger = logging.getLogger(__name__)
 
-
-logging.basicConfig(level=logging.CRITICAL,
-                        format='%(asctime)s - %(levelname)s - %(message)s')
 
 class ManageEc2:
 
 
     def __init__(self,region_name = "us-east-1"):
         self.region_name = region_name
-        try:
-            self.ec2 = boto3.client("ec2",region_name = self.region_name)
-        except NoCredentialsError:
-            logging.error("No se encontraron credenciales de AWS.")
-            print("No se encontraron las credenciales de AWS. Configura tu ~/.aws/credentials")
-            return
+        self.ec2 = boto3.client("ec2",region_name = self.region_name)
+       
 
-    def describe_ec2(self)-> bool|str:
+    def describe_ec2(self)-> tuple[bool,dict | str]:
 
         try:
-    
             response = self.ec2.describe_instances()
             return True,response
 
         except ClientError as e:
-
             code = e.response["Error"]["Code"]
-            logging.error(f"Hubo un error al intentar describir una instancia : {code}")
             return False,code
 
         except NoCredentialsError:
-            logging.error(f"No se encontraron las crendenciales de AWS.")
             return False,"No se encontraron credenciales"
 
-    def verify_identity(self)-> bool|str:
+    def verify_identity(self)-> tuple[bool,dict | str]:
         """
         Creamos cliente de STS para validar credenciales, antes de ejecutar
         metodos que llaman a la API de AWS.
@@ -56,7 +46,7 @@ class ManageEc2:
         except ClientError as e:
             return False, e
 
-    def run_ec2(self,config:dict):
+    def run_ec2(self,config:dict)-> tuple[bool,str]:
 
         machine_type = config.get("TypeMachine")
         ami_id = config.get("AmiId")
@@ -87,15 +77,13 @@ class ManageEc2:
 
         except ClientError as e:
             code = e.response["Error"]["Code"]
-            logging.error(f"Error al intentar lanzar una instancia : {code}")
             return False,code
         
         except NoCredentialsError:
-            logging.error("No se encontraron credendiales de AWS.")
             return False,"No se encontraron credenciales"
         
 
-    def init_ec2(self,instance_id):
+    def init_ec2(self,instance_id:str)-> tuple[bool,str]:
 
         try:
 
@@ -104,15 +92,12 @@ class ManageEc2:
            
         except ClientError  as e:
             code = e.response["Error"]["Code"]
-
-            logging.error(f"Hubo un error al intentar iniciar la instancia. {code}")
-        
             return False,code
         
         except NoCredentialsError:
             return False,"No se encontraron credenciales"
 
-    def reboot_ec2(self,instance_id):
+    def reboot_ec2(self,instance_id:str)-> tuple[bool,str]:
 
         try:
             self.ec2.reboot_instances(InstanceIds=[instance_id])
@@ -120,18 +105,13 @@ class ManageEc2:
         
         except ClientError as e:
             code = e.response["Error"]["Code"]
-
-            logging.error(f"Hubo un error al intentar reiniciar la instancia : {code}")
-
             return False,code
 
         except NoCredentialsError:
-            logging.error("Error en validacion de credenciales AWS.")
-
             return False,"No se encontraron credenciales"
         
              
-    def stop_ec2(self,instance_id):
+    def stop_ec2(self,instance_id:str)-> tuple[bool,str]:
 
         try:
             self.ec2.stop_instances(InstanceIds=[instance_id])
@@ -139,15 +119,12 @@ class ManageEc2:
         
         except ClientError as e:
             code = e.response["Error"]["Code"]
-
-            logging.error(f"Hubo error al intentar detener una instancia : {code}")
             return False,code
 
         except NoCredentialsError:
-            logging.error("Error en validacion de credenciales AWS.")
             return False,"No se encontraron credenciales"
 
-    def terminate_ec2(self,instance_id):
+    def terminate_ec2(self,instance_id:str)-> tuple[bool,str]:
 
         try:
             self.ec2.terminate_instances(InstanceIds=[instance_id])
@@ -155,15 +132,12 @@ class ManageEc2:
 
         except ClientError as e:
             code = e.response["Error"]["Code"]
-
-            logging.error(f"Hubo un error al intentar detener una instancia : {code}")
             return False,code
 
         except NoCredentialsError:
-            logging.error("No se encontraron credenciales de AWS.")
             return False,"No se encontraron credenciales"
 
-    def format_data_ec2(self,response):
+    def format_data_ec2(self,response:dict)-> tuple[dict,list]:
 
         filas_tabulate = []
         dict_id_ec2 = {}
@@ -194,7 +168,7 @@ class ManageEc2:
         return dict_id_ec2,filas_tabulate
 
 
-    def preparative(self):
+    def preparative(self)-> tuple[list,dict]:
 
         flag,code = self.describe_ec2()
 
@@ -205,7 +179,7 @@ class ManageEc2:
         
         
 
-    def waiter_for_state(self,instance_id,target_state):
+    def waiter_for_state(self,instance_id:str,target_state:str)-> bool:
      
         waiter = self.ec2.get_waiter(f"instance_{target_state}")
         waiter.wait(InstanceIds=[instance_id])

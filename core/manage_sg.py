@@ -3,11 +3,7 @@ from botocore.exceptions import ClientError,NoCredentialsError
 import logging
 
 
-
-logging.basicConfig(level=logging.CRITICAL,
-                        format='%(asctime)s - %(levelname)s - %(message)s',
-                        filename="manage_sg.log",
-                        filemode="a")
+logger = logging.getLogger(__name__)
 
 class ManageSecurityGroup:
     
@@ -16,7 +12,7 @@ class ManageSecurityGroup:
         self.ec2 = boto3.client("ec2",region_name=region_name)
         self.sg_id = None
  
-    def get_rules_sg(self,sg_id = ""):
+    def get_rules_sg(self,sg_id:str = "")-> tuple[bool,dict | str]:
 
         try:
             response = self.ec2.describe_security_groups(
@@ -27,15 +23,13 @@ class ManageSecurityGroup:
 
         except ClientError as e:
             code = e.response["Error"]["Code"]
-            logging.error(f"Error al intentar describir sg: {code}")
             return False,code
 
         except NoCredentialsError:
-            logging.error("No se econtraron credenciales AWS.")
             return False,"No se encontraron credenciales"
 
 
-    def formata_data_sg_rules(self,response):
+    def formata_data_sg_rules(self,response:dict)-> tuple[list,dict]:
 
         filas_tabulate = []
         dict_rules_sg = {}
@@ -65,7 +59,7 @@ class ManageSecurityGroup:
                                         ])
         return filas_tabulate,dict_rules_sg
 
-    def format_data_sg_general(self,response):
+    def format_data_sg_general(self,response:dict)-> tuple[list,dict]:
 
         dict_sg_id = {}
         filas_tabulate = []
@@ -82,7 +76,7 @@ class ManageSecurityGroup:
         return filas_tabulate,dict_sg_id
 
 
-    def authorize_rule_ingress(self,ip_permissions:list):
+    def authorize_rule_ingress(self,ip_permissions:list)-> tuple[bool,str]:
 
         
         try:
@@ -94,37 +88,29 @@ class ManageSecurityGroup:
 
         except ClientError as error:
             code = error.response["Error"]["Code"]
-            logging.error(f"Hubo un error al intentar crear una regla de entrada : {code}")
             return False,code
 
         except NoCredentialsError:
-            logging.error("No se econtraron credenciales de AWS.")
             return False,"No se encontraron credenciales"
     
-    def remove_rule_ingress(self,ip_permissions:list):
+    def remove_rule_ingress(self,ip_permissions:list)-> tuple[bool,dict | str]:
 
         
         try:
             for valor in ip_permissions["IpRanges"]:
-
                 del valor["Description"]        
                 
-
             self.ec2.revoke_security_group_ingress(
                 GroupId = self.sg_id,
                 IpPermissions = [ip_permissions]
                         )
             return True,ip_permissions
-        
-                    
+                     
         except ClientError as error:
             code = error.response['Error']['Code']
-            logging.error(f"Error al intentar eliminar una regla de entrada : {code}")
             return False,code
-    
-
+        
         except NoCredentialsError:
-            logging.error("No se encontraron las crendenciales de AWS.")
             return False,"No se encontraron credenciales"
     
 if __name__ == "__main__":

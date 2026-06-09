@@ -3,7 +3,7 @@ from colorama import init,Style,Fore
 from data import data_ec2 
 import requests
 
-def choice(dict_data):
+def choice(dict_data:dict)-> str:
 
     while True:
         choice = input("\nIngrese el numero del INDICE correspondiente al campo que desea seleccionar : ").strip()
@@ -13,7 +13,7 @@ def choice(dict_data):
             return dict_data[choice]
         print("Valor ingresado no es valido o no esta en el rango valido.")
 
-def request_ip_permissions(public_ip):
+def request_ip_permissions(public_ip:str)-> dict:
 
 
     print("Por favor asegurarse de que los datos ingresados sean correctos.\n")
@@ -41,7 +41,7 @@ def request_ip_permissions(public_ip):
             ]
         }
 
-def request_date_config_ec2():
+def request_date_config_ec2()->tuple[int,int,str]:
     
     while True:
          
@@ -66,7 +66,7 @@ MinCount = 2  → "pero necesito al menos 2\n""" + Style.RESET_ALL)
     return min_count,max_count,name_ec2
 
             
-def formate_region_name():
+def formate_region_name()-> list|dict:
 
     filas_tabulate = []
     dict_region_id = {}
@@ -96,7 +96,7 @@ def select_region_name():
     return region_name
 
 
-def handle_aws_error(flag,code):
+def handle_aws_error(flag:bool,code:str):
     """
     Maneja errores de AWS de forma centralizada
     
@@ -173,7 +173,7 @@ def handle_aws_error(flag,code):
             case _:
                 print(Fore.RED + f"Error inesperado: {code}" + Style.RESET_ALL)
 
-def confirmation():
+def confirmation()-> bool:
 
     while True:
         choice = input(Fore.RED + "Esta acción es irreversible, desea continuar S/N: "+ Style.RESET_ALL).strip().lower()
@@ -184,7 +184,7 @@ def confirmation():
 
         return choice == "s"
 
-def get_ip_public():
+def get_ip_public()-> bool|str:
 
     try:
 
@@ -194,7 +194,7 @@ def get_ip_public():
     except Exception:
         return False
 
-def choice_main(dict_options:dict):
+def choice_main(dict_options:dict)-> str:
 
     while True:
         choice = input("\nIngrese la opcion que desee : ")
@@ -206,7 +206,7 @@ def choice_main(dict_options:dict):
         return choice
 
 
-def display_table(data,header,title):
+def display_table(data:list,header:list,title:str):
 
     print(title)
     print(tabulate(data,headers=header,tablefmt="fancy_grid"))
