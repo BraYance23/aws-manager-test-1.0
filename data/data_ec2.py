@@ -60,6 +60,14 @@ TYPES_INSTANCES = [
 ]
 
 
+pameter_operation_ec2 = {
+    "3": ("Iniciando instancia","running","Instancia iniciada correctamente."),
+    "4": ("Reiniciando instancia","running","Instancia reiniciada correctamente."),
+    "5": ("Deteniendo instancia instancia","stopped","Instancia detenenida correctamente."),
+    "6": ("Eliminar instancia","terminated","Instancia terminada correctamente.")
+}
+    
+
 OS_AVALIBLE = [
     ["1","Amazon Linux","x86_64"],
     ["2","Ubuntu","x86_64"],

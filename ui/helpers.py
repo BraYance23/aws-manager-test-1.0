@@ -12,6 +12,7 @@ def choice(dict_data:dict)-> str:
 
             return dict_data[choice]
         print("Valor ingresado no es valido o no esta en el rango valido.")
+    
 
 def request_ip_permissions(public_ip:str)-> dict:
 
@@ -96,7 +97,7 @@ def select_region_name():
     return region_name
 
 
-def handle_aws_error(flag:bool,code:str):
+def handle_aws_error(code:str):
     """
     Maneja errores de AWS de forma centralizada
     
@@ -104,74 +105,72 @@ def handle_aws_error(flag:bool,code:str):
         code: La excepción ClientError capturada
     """
 
-    if not flag:
+    match code:
+        # Errores de instancias
+        case "InvalidInstanceID.NotFound":
+            print(Fore.RED + f"Error: La instancia especificada no existe" + Style.RESET_ALL)
+        case "InvalidInstanceID.Malformed":
+            print(Fore.RED + f"El ID de la instancia tiene formato inválido" + Style.RESET_ALL)
+        case "IncorrectInstanceState":
+            print(Fore.RED + f"La instancia no puede realizar esta acción desde su estado actual" + Style.RESET_ALL)
+        case "OperationNotPermitted":
+            print(Fore.RED + f"La instancia tiene protección de terminación activada" + Style.RESET_ALL)
+        case "InsufficientInstanceCapacity":
+            print(Fore.RED + f"AWS no tiene capacidad disponible para este tipo de instancia" + Style.RESET_ALL)
+        case "InstanceLimitExceeded":
+            print(Fore.RED + f"Has alcanzado el límite de instancias en tu cuenta" + Style.RESET_ALL)
+        case "UnsupportedInstanceAttribute":
+            print(Fore.RED + f"Las instancias spot no soportan esta operación" + Style.RESET_ALL)
 
-        match code:
-            # Errores de instancias
-            case "InvalidInstanceID.NotFound":
-                print(Fore.RED + f"Error: La instancia especificada no existe" + Style.RESET_ALL)
-            case "InvalidInstanceID.Malformed":
-                print(Fore.RED + f"El ID de la instancia tiene formato inválido" + Style.RESET_ALL)
-            case "IncorrectInstanceState":
-                print(Fore.RED + f"La instancia no puede realizar esta acción desde su estado actual" + Style.RESET_ALL)
-            case "OperationNotPermitted":
-                print(Fore.RED + f"La instancia tiene protección de terminación activada" + Style.RESET_ALL)
-            case "InsufficientInstanceCapacity":
-                print(Fore.RED + f"AWS no tiene capacidad disponible para este tipo de instancia" + Style.RESET_ALL)
-            case "InstanceLimitExceeded":
-                print(Fore.RED + f"Has alcanzado el límite de instancias en tu cuenta" + Style.RESET_ALL)
-            case "UnsupportedInstanceAttribute":
-                print(Fore.RED + f"Las instancias spot no soportan esta operación" + Style.RESET_ALL)
+        # Errores de AMI
+        case "InvalidAMIID.NotFound":
+            print(Fore.RED + f"La AMI especificada no existe" + Style.RESET_ALL)
+        case "InvalidAMIID.Malformed":
+            print(Fore.RED + f"El ID de la AMI tiene formato inválido" + Style.RESET_ALL)
 
-            # Errores de AMI
-            case "InvalidAMIID.NotFound":
-                print(Fore.RED + f"La AMI especificada no existe" + Style.RESET_ALL)
-            case "InvalidAMIID.Malformed":
-                print(Fore.RED + f"El ID de la AMI tiene formato inválido" + Style.RESET_ALL)
+        # Errores de Key Pairs
+        case "InvalidKeyPair.NotFound":
+            print(Fore.RED + f"La key pair especificada no existe" + Style.RESET_ALL)
+        case "InvalidKeyPair.Duplicate":
+            print(Fore.RED + f"Ya existe una key pair con ese nombre" + Style.RESET_ALL)
+        case "KeyPairLimitExceeded":
+            print(Fore.RED + f"Has alcanzado el límite de key pairs en tu cuenta" + Style.RESET_ALL)
+        case "ErrorSaveKey":
+            print(Fore.RED + "Hubo un error al intentar guarda las key pairs en su dispitivo." + Style.RESET_ALL)
 
-            # Errores de Key Pairs
-            case "InvalidKeyPair.NotFound":
-                print(Fore.RED + f"La key pair especificada no existe" + Style.RESET_ALL)
-            case "InvalidKeyPair.Duplicate":
-                print(Fore.RED + f"Ya existe una key pair con ese nombre" + Style.RESET_ALL)
-            case "KeyPairLimitExceeded":
-                print(Fore.RED + f"Has alcanzado el límite de key pairs en tu cuenta" + Style.RESET_ALL)
-            case "ErrorSaveKey":
-                print(Fore.RED + "Hubo un error al intentar guarda las key pairs en su dispitivo." + Style.RESET_ALL)
+        # Errores de Security Groups
+        case "InvalidGroup.NotFound":
+            print(Fore.RED + f"El security group especificado no existe" + Style.RESET_ALL)
+        case "InvalidGroupId.Malformed":
+            print(Fore.RED + f"El ID del security group tiene formato inválido" + Style.RESET_ALL)
+        case "InvalidPermission.Duplicate":
+            print(Fore.RED + f"La regla ya existe en el security group" + Style.RESET_ALL)
+        case "InvalidPermission.NotFound":
+            print(Fore.RED + f"La regla especificada no existe en el security group" + Style.RESET_ALL)
+        case "RulesPerSecurityGroupLimitExceeded":
+            print(Fore.RED + f"Has alcanzado el límite de reglas en este security group" + Style.RESET_ALL)
 
-            # Errores de Security Groups
-            case "InvalidGroup.NotFound":
-                print(Fore.RED + f"El security group especificado no existe" + Style.RESET_ALL)
-            case "InvalidGroupId.Malformed":
-                print(Fore.RED + f"El ID del security group tiene formato inválido" + Style.RESET_ALL)
-            case "InvalidPermission.Duplicate":
-                print(Fore.RED + f"La regla ya existe en el security group" + Style.RESET_ALL)
-            case "InvalidPermission.NotFound":
-                print(Fore.RED + f"La regla especificada no existe en el security group" + Style.RESET_ALL)
-            case "RulesPerSecurityGroupLimitExceeded":
-                print(Fore.RED + f"Has alcanzado el límite de reglas en este security group" + Style.RESET_ALL)
+        # Errores de Subnet
+        case "InvalidSubnet.NotFound":
+            print(Fore.RED + f"La subnet especificada no existe" + Style.RESET_ALL)
 
-            # Errores de Subnet
-            case "InvalidSubnet.NotFound":
-                print(Fore.RED + f"La subnet especificada no existe" + Style.RESET_ALL)
+        # Errores genéricos
+        case "InvalidParameterValue":
+            print(Fore.RED + f"Uno de los parámetros tiene un valor inválido" + Style.RESET_ALL)
+        case "UnauthorizedOperation":
+            print(Fore.RED + f"No tienes permisos para realizar esta operación" + Style.RESET_ALL)
+        case "AuthFailure":
+            print(Fore.RED + f"Credenciales incorrectas o expiradas" + Style.RESET_ALL)
+        case "RequestExpired":
+            print(Fore.RED + f"La solicitud expiró, verifica la hora del sistema" + Style.RESET_ALL)
 
-            # Errores genéricos
-            case "InvalidParameterValue":
-                print(Fore.RED + f"Uno de los parámetros tiene un valor inválido" + Style.RESET_ALL)
-            case "UnauthorizedOperation":
-                print(Fore.RED + f"No tienes permisos para realizar esta operación" + Style.RESET_ALL)
-            case "AuthFailure":
-                print(Fore.RED + f"Credenciales incorrectas o expiradas" + Style.RESET_ALL)
-            case "RequestExpired":
-                print(Fore.RED + f"La solicitud expiró, verifica la hora del sistema" + Style.RESET_ALL)
+        # No se encontraron credenciales de aws
+        case "No se encontraron credenciales":
+            print(Fore.RED + "No se encontraron las credenciales de aws, ejecute en su terminal 'aws configure' para validar credenciales."+ Style.RESET_ALL)
 
-            # No se encontraron credenciales de aws
-            case "No se encontraron credenciales":
-                print(Fore.RED + "No se encontraron las credenciales de aws, ejecute en su terminal 'aws configure' para validar credenciales."+ Style.RESET_ALL)
-
-            # Catch-all
-            case _:
-                print(Fore.RED + f"Error inesperado: {code}" + Style.RESET_ALL)
+        # Catch-all
+        case _:
+            print(Fore.RED + f"Error inesperado: {code}" + Style.RESET_ALL)
 
 def confirmation()-> bool:
 

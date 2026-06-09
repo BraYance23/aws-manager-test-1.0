@@ -12,12 +12,12 @@ import time
 logger = logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    filename="app.log"
+    filename="manager_aws.log"
 )
 
 class ManagerAWS:
 
-    def __init__(self,region_name="us-east-1"):
+    def __init__(self,region_name:str="us-east-1"):
         self.region_name = region_name
         self.ADMIN_EC2 = ManageEc2(self.region_name)
         self.ADMIN_AMI = ManageAmi(self.region_name)
@@ -32,7 +32,7 @@ class ManagerAWS:
         flag,code = self.ADMIN_EC2.run_ec2(config_instace)
 
         if not flag:
-            helpers.handle_aws_error(flag,code)
+            helpers.handle_aws_error(code)
             logger.error(f"Error al lanzar instancia : {code}")
             return
 
@@ -41,34 +41,55 @@ class ManagerAWS:
         self.ADMIN_EC2.waiter_for_state(code,"running")
         print("instancia desplegada correctamente.🚀" + Style.RESET_ALL)
         
-    
-    def init_ec2(self):
+    def operation_ec2(self,selection):
 
         dict_id_ec2,filas_tabulate = self.ADMIN_EC2.preparative()
 
         if not filas_tabulate:
             print("No hay instancias existentes en esta region.")
             return
+        
+        metodos_ec2 = {
+            "3": self.ADMIN_EC2.init_ec2,
+            "4": self.ADMIN_EC2.reboot_ec2,
+            "5": self.ADMIN_EC2.stop_ec2,
+            "6": self.ADMIN_EC2.terminate_ec2
+        }
 
         self.show_instances()
 
         instance_id = helpers.choice(dict_id_ec2)
-        flag,code = self.ADMIN_EC2.init_ec2(instance_id)
 
-        if not flag:
-            helpers.handle_aws_error(flag,code)
+        if not instance_id:
+            print("Hubo un error al elegir la instancia.")
             return
 
-        print(Fore.CYAN + Style.BRIGHT + "📟-Iniciando instancia..." + Style.RESET_ALL)
-        self.ADMIN_EC2.waiter_for_state(instance_id,"running")
-        print("✅ Instancia iniciada correctamente.")
+        mensaje_init,waiter,mensaje_fin = data_ec2.pameter_operation_ec2[selection]
+
+        if waiter == "terminated":
+
+            confirmation = helpers.confirmation()
+
+            if not confirmation:
+                return
+
+        flag,code = metodos_ec2[selection](instance_id)
+
+        if not flag:
+            helpers.handle_aws_error(code)
+            return
+        
+        print(Fore.CYAN + Style.BRIGHT +  mensaje_init + Style.RESET_ALL)
+        self.ADMIN_EC2.waiter_for_state(instance_id,waiter)
+        print(mensaje_fin)
+    
                 
     def show_instances(self):
 
         dict_ec2_id,filas_tabulate = self.ADMIN_EC2.preparative()
 
         if not dict_ec2_id:
-            helpers.handle_aws_error(dict_ec2_id,filas_tabulate)
+            helpers.handle_aws_error(filas_tabulate)
 
         if not filas_tabulate:
             print("No hay instancias existentes en esta region.")
@@ -78,75 +99,6 @@ class ManagerAWS:
 
         helpers.display_table(filas_tabulate,header,title)
 
-    def stop_ec2(self):
-
-        dict_id_ec2,filas_tabulate = self.ADMIN_EC2.preparative()
-
-        if not dict_id_ec2:
-            print("No hay instancias existentes en esta region.")
-            return
-
-        self.show_instances()
-
-        instance_id = helpers.choice(dict_id_ec2)
-        flag,code = self.ADMIN_EC2.stop_ec2(instance_id)
-
-        if not flag:
-            helpers.handle_aws_error(flag,code)
-            return
-        
-        print(Fore.CYAN + Style.BRIGHT + "-⛔Deteneniendo instancia..." + Style.RESET_ALL)
-        self.ADMIN_EC2.waiter_for_state(instance_id,"stopped")
-        print("Instancia detenida correctamente")
-  
-    def reboot_ec2(self):
-
-        dict_id_ec2,filas_tabulate = self.ADMIN_EC2.preparative()
-
-        if not dict_id_ec2:
-            print("No hay instancias existentes en esta region.")
-            return
-
-        self.show_instances()
-        
-        instance_id = helpers.choice(dict_id_ec2)
-
-        flag,code = self.ADMIN_EC2.reboot_ec2(instance_id)
-
-        if not flag:
-            helpers.handle_aws_error(flag,code)
-            return
-
-        print(Fore.CYAN + Style.BRIGHT + "⟳Reinciando instancia..." + Style.RESET_ALL)
-        self.ADMIN_EC2.waiter_for_state(instance_id,"running")
-        print("Instancia reiniciada correctamente")
-                    
-    def terminate_ec2(self):
-        
-        dict_id_ec2,filas_tabulate  = self.ADMIN_EC2.preparative()
-        if not dict_id_ec2:
-            print("No hay instancias existentes en esta region.")
-            return
-
-        self.show_instances()
-
-        instance_id = helpers.choice(dict_id_ec2)
-
-        confirmation = helpers.confirmation()
-
-        if not confirmation:
-            print("Operacion cancelada")
-            return
-        flag,code = self.ADMIN_EC2.terminate_ec2(instance_id)
-        
-        if not flag:
-            helpers.handle_aws_error(flag,code)
-            return
-
-        print(Fore.BLUE + Style.BRIGHT + "🗑️-Eliminando instancia..." + Style.RESET_ALL)
-        self.ADMIN_EC2.waiter_for_state(instance_id,"terminated")
-        print("Instancia eliminado correctamente.")
-    
 #Security Groups
 
     def inject_sg_id(self):
@@ -162,7 +114,7 @@ class ManagerAWS:
         header = data_ec2.header_sg["header"]
         title = data_ec2.header_sg["title"]
 
-        helpers.display_table(filas_tabulate,header,title)
+        helpers.display_table(header,title)
         
         return helpers.choice(dict_sg_id)
             
@@ -172,7 +124,7 @@ class ManagerAWS:
         flag,response_or_code = self.ADMIN_SG.get_rules_sg(self.ADMIN_SG.sg_id)
 
         if not flag:
-            helpers.handle_aws_error(flag,response_or_code)
+            helpers.handle_aws_error(response_or_code)
             return
 
         filas_tabulate,dict_rules = self.ADMIN_SG.formata_data_sg_rules(response_or_code)
@@ -198,7 +150,7 @@ class ManagerAWS:
         flag,code_or_rule = self.ADMIN_SG.authorize_rule_ingress(ip_permissions)
 
         if not flag:
-                  helpers.handle_aws_error(flag,code_or_rule)
+                  helpers.handle_aws_error(code_or_rule)
                   return
                   
         print(Fore.GREEN + f"Puerto: {ip_permissions['FromPort']} abierto con exito en : {self.ADMIN_SG.sg_id}" + Style.RESET_ALL)
@@ -210,7 +162,7 @@ class ManagerAWS:
         flag_get_rules,response_or_code = self.ADMIN_SG.get_rules_sg(self.ADMIN_SG.sg_id)
         
         if not flag_get_rules:
-            helpers.handle_aws_error(flag_get_rules,response_or_code)
+            helpers.handle_aws_error(response_or_code)
             return
             
         filas_tabulate,dict_rules = self.ADMIN_SG.formata_data_sg_rules(response_or_code)
@@ -246,10 +198,10 @@ class ManagerAWS:
         flag,response_or_code = self.ADMIN_KEY.request_key_pairs()
 
         if not flag:
-            helpers.handle_aws_error(flag,response_or_code)
+            helpers.handle_aws_error(response_or_code)
             return
 
-        dict_id_key,filas_tabulate = self.ADMIN_KEY.prepare_data(response_or_code)
+        dict_id_key,filas_tabulate = self.ADMIN_KEY.format_data(response_or_code)
         if not filas_tabulate:
             print(f"No hay llaves SSH en esta region : {self.region_name}")
             return
@@ -258,6 +210,26 @@ class ManagerAWS:
         title = data_ec2.header_key_pair["title"]
         helpers.display_table(filas_tabulate,header,title)
 
+    def select_key_pair(self):
+
+        flag,response = self.ADMIN_KEY.request_key_pairs()
+
+        if not flag:
+            helpers.handle_aws_error(response)
+            return
+        
+        dict_key,filas_tabulate = self.ADMIN_KEY.format_data(response)
+
+        if not filas_tabulate:
+            print(f"No hay llaves SSH existentes en esta region : {self.region_name}")
+            return None
+
+        headers = data_ec2.header_key_pair["header"]
+        title = data_ec2.header_key_pair["title"]
+
+        helpers.display_table(filas_tabulate,headers,title)
+        return helpers.choice(dict_key)
+    
     def generate_key_pairs(self):
 
         name_key = self.ADMIN_KEY.request_name_key()
@@ -268,51 +240,35 @@ class ManagerAWS:
         flag_gen_key,response_generate_key = self.ADMIN_KEY.generate_key_pair(name_key)
 
         if not flag_gen_key:
-            helpers.handle_aws_error(flag_gen_key,response_generate_key)
+            helpers.handle_aws_error(response_generate_key)
             return
 
         flag_save_key,response_save_key = self.ADMIN_KEY.save_key_pair(response_generate_key,name_key)
 
         if not flag_save_key:
-            helpers.handle_aws_error(flag_save_key,response_save_key)
+            helpers.handle_aws_error(response_save_key)
             return
         
         print(Fore.GREEN + f"Llave guardada con exito en : {response_save_key}" + Style.RESET_ALL)
 
-    def delete_key_pairs(self,cut:bool=False):
+    def delete_key_pairs(self):
+  
+        selected_key_pair = self.select_key_pair()
 
-        succes,response = self.ADMIN_KEY.request_key_pairs()
+        if not selected_key_pair:
+            print("Hubo un error al seleccionar la llave SSH.")
+            return
 
-        if not succes:
-            helpers.handle_aws_error(succes,response)
+        confirmation = helpers.confirmation()
+        if not confirmation:
+            print("Operacion cancelada")
             return
         
-        dict_key,filas_tabulate = self.ADMIN_KEY.prepare_data(response)
+        deleted_successfully,delete_code = self.ADMIN_KEY.delete_key_pair(selected_key_pair)
 
-        if not filas_tabulate:
-            print(f"No hay llaves SSH existentes en esta region : {self.region_name}")
+        if not deleted_successfully:
+            helpers.handle_aws_error(delete_code)
             return
-        
-        self.show_key_pairs()
-        
-        selected_key_pair = helpers.choice(dict_key)
-
-
-        if not cut:
-
-            confirmation = helpers.confirmation()
-
-            if not confirmation:
-                print("Operacion cancelada")
-                return
-        
-            deleted_successfully,delete_code = self.ADMIN_KEY.delete_key_pair(selected_key_pair)
-
-            if not deleted_successfully:
-                helpers.handle_aws_error(deleted_successfully,delete_code)
-                return
-            
-        return selected_key_pair
 
 #AMIS
 
@@ -355,7 +311,7 @@ class ManagerAWS:
         flag,code = self.ADMIN_AMI.get_ami_id(owner,filtro)
 
         if not flag:
-            helpers.handle_aws_error(flag,code)
+            helpers.handle_aws_error(code)
             return
         
         filas_tabulate,dict_ami_id = self.ADMIN_AMI.prepare_data_ami(code)
@@ -373,11 +329,11 @@ class ManagerAWS:
 
         return self.select_ami_id(selected_os,version_os)
 
-    def request_date_run_instance(self):
+    def request_date_run_instance(self)-> dict:
 
         type_machime = self.select_type_ec2()
         ami_id = self.get_ami_id()
-        key_pair_id = self.delete_key_pairs(True)
+        key_pair_id = self.select_key_pair()
         sg_id = self.inject_sg_id()
         min_count,max_count,name_instance = helpers.request_date_config_ec2()
 
@@ -412,13 +368,13 @@ class ManagerAWS:
                 case "2":
                     self.run_ec2()
                 case "3":
-                    self.init_ec2()
+                    self.operation_ec2(choice_ec2)
                 case "4":
-                    self.reboot_ec2()
+                    self.operation_ec2(choice_ec2)
                 case "5":
-                    self.stop_ec2()
+                    self.operation_ec2(choice_ec2)
                 case "6":
-                    self.terminate_ec2()
+                    self.operation_ec2(choice_ec2)
                 case "7":
                     break
 
@@ -483,8 +439,7 @@ def main():
         print(Fore.GREEN +"Validando credenciales..")
         print("Conectando con AWS..." + Style.RESET_ALL)
         time.sleep(4)
-
-            
+   
         flag,code = manager.ADMIN_EC2.verify_identity()
 
         if not flag:
@@ -510,7 +465,6 @@ def main():
             print("-" * 30)
 
             choice_aws = helpers.choice_main(options_aws)
-
             match choice_aws:
 
                 case "1":

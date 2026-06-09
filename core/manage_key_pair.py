@@ -26,7 +26,7 @@ class ManageKeyPairs:
         except NoCredentialsError:
             return False,"No se encontraron credenciales"
       
-    def prepare_data(self,response:dict)-> tuple[dict,list]:
+    def format_data(self,response:dict)-> tuple[dict,list]:
         
         filas_tabulate = []
         dict_key_id = {}
@@ -61,7 +61,7 @@ class ManageKeyPairs:
 
         except NoCredentialsError as error:
             return False,"No se encontraron credenciales"
-            
+
     def request_name_key(self)-> str:
 
         while True:
