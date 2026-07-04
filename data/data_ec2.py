@@ -59,15 +59,13 @@ TYPES_INSTANCES = [
     ["15", "c5a.24xlarge", 96, "192 GB", "$3.696", "~$2,661.12", ""]
 ]
 
-
 pameter_operation_ec2 = {
-    "3": ("Iniciando instancia","running","Instancia iniciada correctamente."),
-    "4": ("Reiniciando instancia","running","Instancia reiniciada correctamente."),
-    "5": ("Deteniendo instancia instancia","stopped","Instancia detenenida correctamente."),
-    "6": ("Eliminar instancia","terminated","Instancia terminada correctamente.")
-}
+    "3": ("📟-Iniciando instancia","running","✅-Instancia iniciada correctamente."),
+    "4": ("🔁-Reiniciando instancia","running","✅-Instancia reiniciada correctamente."),
+    "5": ("🛑-Deteniendo instancia","stopped","✅-Instancia detenenida correctamente."),
+    "6": ("🗑️-Eliminando instancia","terminated","✅-Instancia terminada correctamente.")
+}    
     
-
 OS_AVALIBLE = [
     ["1","Amazon Linux","x86_64"],
     ["2","Ubuntu","x86_64"],
@@ -95,7 +93,7 @@ header_region_name = {"header" :["INDICE",
                                      "Region ID"],
                      "title": "Regiones disponibles para administrar"}
 
-header_dashboard = {"header": [Style.BRIGHT+"Account ID","ARN","Region Name" + Style.RESET_ALL],
+header_dashboard = {"header": [Style.BRIGHT+"Account ID","ARN","Location Name","Region Name" + Style.RESET_ALL],
                     "title": "Datos asociados a su cuenta de AWS"}
 
 
@@ -173,8 +171,3 @@ main_key_pair = {"1": "Listar llaves SSH",
                  "2": "Crear llave SSH",
                  "3": "Eliminar llave SSH",
                  "4": "Volver al menu principal"}
-
-
-
-if __name__ == "__main__":
-    pass

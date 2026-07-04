@@ -1,20 +1,20 @@
-from core.manage_ami import ManageAmi
-from core.manage_ec2 import ManageEc2
+import json
+import time
+import logging
+from config import logging_config
+from colorama import init,Style,Fore
 from core.manage_key_pair import ManageKeyPairs
 from core.manage_sg import ManageSecurityGroup
+from core.manage_ami import ManageAmi
+from core.manage_ec2 import ManageEc2
+from controllers import menu_services
 from data import data_ec2
 from ui import helpers
-import logging
-from colorama import init,Style,Fore
-import time
 
 
-logger = logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    filename="manager_aws.log"
-)
 
+logging_config.setup_logging()
+logger = logging.getLogger(__name__)
 class ManagerAWS:
 
     def __init__(self,region_name:str="us-east-1"):
@@ -36,60 +36,56 @@ class ManagerAWS:
             logger.error(f"Error al lanzar instancia : {code}")
             return
 
-        logger.info(f"Deploy EC2, ID : {code}")
+        logger.info(f"EC2 desplegado correctamente, ID : {code}")
         print(Fore.CYAN + Style.BRIGHT + "-Desplegando instancia...")
         self.ADMIN_EC2.waiter_for_state(code,"running")
         print("instancia desplegada correctamente.🚀" + Style.RESET_ALL)
         
     def operation_ec2(self,selection):
 
-        dict_id_ec2,filas_tabulate = self.ADMIN_EC2.preparative()
+        flag_describe_ec2,response = self.ADMIN_EC2.describe_ec2()
+        if not flag_describe_ec2:
+            helpers.handle_aws_error(response)
+            return
 
+        dict_id_ec2,filas_tabulate = self.ADMIN_EC2.format_data_ec2(response)
         if not filas_tabulate:
             print("No hay instancias existentes en esta region.")
             return
         
+        self.show_instances()
+        instance_id = helpers.choice(dict_id_ec2)
+
+        mensaje_init,waiter,mensaje_fin = data_ec2.pameter_operation_ec2[selection]
+        if waiter == "terminated" and  not helpers.confirmation():
+            print(Fore.YELLOW + "Operacion cancelada por el usuario" + Style.RESET_ALL)
+            return
+
         metodos_ec2 = {
             "3": self.ADMIN_EC2.init_ec2,
             "4": self.ADMIN_EC2.reboot_ec2,
             "5": self.ADMIN_EC2.stop_ec2,
             "6": self.ADMIN_EC2.terminate_ec2
-        }
-
-        self.show_instances()
-
-        instance_id = helpers.choice(dict_id_ec2)
-
-        if not instance_id:
-            print("Hubo un error al elegir la instancia.")
-            return
-
-        mensaje_init,waiter,mensaje_fin = data_ec2.pameter_operation_ec2[selection]
-
-        if waiter == "terminated":
-
-            confirmation = helpers.confirmation()
-
-            if not confirmation:
-                return
+            }
 
         flag,code = metodos_ec2[selection](instance_id)
-
         if not flag:
             helpers.handle_aws_error(code)
             return
         
-        print(Fore.CYAN + Style.BRIGHT +  mensaje_init + Style.RESET_ALL)
+        print(Style.BRIGHT +  mensaje_init + Style.RESET_ALL)
         self.ADMIN_EC2.waiter_for_state(instance_id,waiter)
-        print(mensaje_fin)
-    
-                
+        print(Fore.GREEN + mensaje_fin + Style.RESET_ALL)
+                 
     def show_instances(self):
 
-        dict_ec2_id,filas_tabulate = self.ADMIN_EC2.preparative()
+        flag_response,response = self.ADMIN_EC2.describe_ec2()
 
-        if not dict_ec2_id:
-            helpers.handle_aws_error(filas_tabulate)
+        if not flag_response:
+            helpers.handle_aws_error(flag_response)
+            return
+        
+        dict_ec2_id,filas_tabulate = self.ADMIN_EC2.format_data_ec2(response)
 
         if not filas_tabulate:
             print("No hay instancias existentes en esta region.")
@@ -98,6 +94,7 @@ class ManagerAWS:
         title = data_ec2.header_ec2["title"]
 
         helpers.display_table(filas_tabulate,header,title)
+        logger.info("EC2 listadas correctamente.")
 
 #Security Groups
 
@@ -106,7 +103,7 @@ class ManagerAWS:
         flag,response_or_code = self.ADMIN_SG.get_rules_sg()
 
         if not flag:
-            helpers.handle_aws_error(flag,response_or_code)
+            helpers.handle_aws_error(response_or_code)
             return
 
         filas_tabulate,dict_sg_id = self.ADMIN_SG.format_data_sg_general(response_or_code)
@@ -114,7 +111,7 @@ class ManagerAWS:
         header = data_ec2.header_sg["header"]
         title = data_ec2.header_sg["title"]
 
-        helpers.display_table(header,title)
+        helpers.display_table(filas_tabulate,header,title)
         
         return helpers.choice(dict_sg_id)
             
@@ -151,9 +148,12 @@ class ManagerAWS:
 
         if not flag:
                   helpers.handle_aws_error(code_or_rule)
+                  logger.error(f"Fallo  autorize_ingress | SG ID : {self.ADMIN_SG.sg_id} | CODE : {code_or_rule}")
                   return
-                  
+
+        format_ip_permissions = json.dumps(ip_permissions,indent=2,default=str)   
         print(Fore.GREEN + f"Puerto: {ip_permissions['FromPort']} abierto con exito en : {self.ADMIN_SG.sg_id}" + Style.RESET_ALL)
+        logger.info(f"Autorize_ingress en SG ID: {self.ADMIN_SG.sg_id}\nRegla : {format_ip_permissions}")
         input("Presione enter para listar las reglas actualizadas.")
         self.show_rules_sg()
                 
@@ -173,7 +173,6 @@ class ManagerAWS:
             return
 
         selected_rule = helpers.choice(dict_rules)
-
         confirmation = helpers.confirmation()
 
         if not confirmation:
@@ -182,9 +181,12 @@ class ManagerAWS:
         flag_rules_ingress,code_or_rule = self.ADMIN_SG.remove_rule_ingress(selected_rule)
 
         if not flag_rules_ingress:
-                helpers.handle_aws_error(flag_rules_ingress,code_or_rule)
+                helpers.handle_aws_error(code_or_rule)
+                logger.error(f"Fallo en revoke_ingress | SG ID : {self.ADMIN_SG.sg_id} | CODE : {code_or_rule}")
                 return
 
+        format_ip_permissions = json.dumps(selected_rule,indent=2,default=2)
+        logger.info(f"Revoke ingress en SG ID : {self.ADMIN_SG.sg_id}\nRegla : {format_ip_permissions}")
         print(Fore.GREEN +f"Puerto : {code_or_rule['ToPort']} eliminado con exito de : {self.ADMIN_SG.sg_id}" + Style.RESET_ALL)
 
     def change_sg_id(self):
@@ -249,7 +251,7 @@ class ManagerAWS:
             helpers.handle_aws_error(response_save_key)
             return
         
-        print(Fore.GREEN + f"Llave guardada con exito en : {response_save_key}" + Style.RESET_ALL)
+        print(Fore.GREEN + f"💾-Llave guardada con exito en : {response_save_key}" + Style.RESET_ALL)
 
     def delete_key_pairs(self):
   
@@ -265,6 +267,7 @@ class ManagerAWS:
             return
         
         deleted_successfully,delete_code = self.ADMIN_KEY.delete_key_pair(selected_key_pair)
+        logger.info()
 
         if not deleted_successfully:
             helpers.handle_aws_error(delete_code)
@@ -347,144 +350,31 @@ class ManagerAWS:
             "MaxCount": max_count
         }
 
-#MENUS DE ORQUESTADORES
-    def ec2_menu(self):
-
-        while True:
-
-            options_ec2 =  data_ec2.main_ec2
-
-            print("Manage EC2\n")
-            for clave,valor in options_ec2.items():
-                print(f"\t{clave}-{valor}")
-
-            choice_ec2 = helpers.choice_main(options_ec2)
-
-            match choice_ec2:
-
-                case "1":
-                    self.show_instances()
-                    input("Presione enter para continuar")
-                case "2":
-                    self.run_ec2()
-                case "3":
-                    self.operation_ec2(choice_ec2)
-                case "4":
-                    self.operation_ec2(choice_ec2)
-                case "5":
-                    self.operation_ec2(choice_ec2)
-                case "6":
-                    self.operation_ec2(choice_ec2)
-                case "7":
-                    break
-
-    def sg_menu(self):
-
-        while True:
-
-            option_sg = data_ec2.main_sg
-            print("Manage Security Groups")
-            print( f"Estas operando sobre grupo de seguridad : {Style.BRIGHT + self.ADMIN_SG.sg_id + Style.RESET_ALL} \n")
-
-            for clave,valor in option_sg.items():
-
-                print(f"\t{clave}-{valor}")
-
-            choice_sg = helpers.choice_main(option_sg)
-
-            match choice_sg:
-
-                case "1":
-                    self.show_rules_sg()
-                    input("Presione enter para continuar.")
-                case "2":
-                    self.autorize_sg_ingress()
-                case "3":
-                    self.revoke_sg_ingress()
-                case "4":
-                    self.change_sg_id()
-                case "5":
-                    break
-
-    def kp_menu(self):
-        
-        while True:
-
-            options_key_pair = data_ec2.main_key_pair
-                        
-            print("Manage Key Pairs\n")
-            for clave,valor in options_key_pair.items():
-                print(f"\t{clave}-{valor}")
-
-            choice_key_pair = helpers.choice_main(options_key_pair)
-
-            match choice_key_pair:
-
-                case "1":
-                    self.show_key_pairs()
-                    input("Presione enter para continuar.")
-                case "2":
-                    self.generate_key_pairs()
-                case "3":
-                    self.delete_key_pairs()
-                case "4":
-                    break
-
-
 def main():
-        
-    while True:
-        region_name = helpers.select_region_name()
-        manager = ManagerAWS(region_name)
-        print(Fore.GREEN +"Validando credenciales..")
-        print("Conectando con AWS..." + Style.RESET_ALL)
-        time.sleep(4)
-   
-        flag,code = manager.ADMIN_EC2.verify_identity()
 
-        if not flag:
-            helpers.handle_aws_error(flag,code)
-            return
-
-        matriz_dasboard = [[code.get("Account"),code.get("Arn"),manager.region_name]]
-        header = data_ec2.header_dashboard["header"]
-        title = data_ec2.header_dashboard["title"]
-        print(Fore.GREEN + "conexion exitosa :D" + Style.RESET_ALL)
-
+    try: 
         while True:
+            region_name,location_name = helpers.select_region_name()
+            manager = ManagerAWS(region_name)
+            print(Fore.GREEN +"Validando credenciales..")
+            print("Conectando con AWS..." + Style.RESET_ALL)
+            time.sleep(1)
+    
+            flag,code = manager.ADMIN_EC2.verify_identity()
 
-            print(Style.BRIGHT + f"\tBienvenido a Manage AWS \n" + Style.RESET_ALL)
-            helpers.display_table(matriz_dasboard,header,title)
+            if not flag:
+                helpers.handle_aws_error(code)
+                return
 
-            options_aws = data_ec2.main_aws
-
-            print("_" * 30)
-            for clave,valor in options_aws.items():
-
-                print(f"|{clave}-{valor}")
-            print("-" * 30)
-
-            choice_aws = helpers.choice_main(options_aws)
-            match choice_aws:
-
-                case "1":
-                    manager.ec2_menu()
-                case "2":
-                    manager.change_sg_id()
-                    manager.sg_menu()
-                case "3":
-                    manager.kp_menu()
-                case "4":
-                    break
-                case "5":
-                    print(Fore.GREEN + ":D Hasta pronto..." + Style.RESET_ALL)
-                    return
+            matriz_dasboard = [[code.get("Account"),code.get("Arn"),location_name,manager.region_name]]
+            print(Fore.GREEN + "conexion exitosa :D" + Style.RESET_ALL)
+            exit = menu_services.root_menu(matriz_dasboard,manager)
+            
+            if exit:
+                return
+    except KeyboardInterrupt:
+        return
                        
                     
-
 if __name__ == "__main__":
-    
-    try:
-        main()
-    except KeyboardInterrupt:
-        pass
+    main()

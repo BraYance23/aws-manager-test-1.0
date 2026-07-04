@@ -1,10 +1,9 @@
+import logging
 import boto3
 from botocore.exceptions import ClientError,NoCredentialsError
-import logging
 
 
 logger = logging.getLogger(__name__)
-
 
 class ManageEc2:
 
@@ -82,7 +81,6 @@ class ManageEc2:
         except NoCredentialsError:
             return False,"No se encontraron credenciales"
         
-
     def init_ec2(self,instance_id:str)-> tuple[bool,str]:
 
         try:
@@ -109,8 +107,7 @@ class ManageEc2:
 
         except NoCredentialsError:
             return False,"No se encontraron credenciales"
-        
-             
+                   
     def stop_ec2(self,instance_id:str)-> tuple[bool,str]:
 
         try:
@@ -141,18 +138,16 @@ class ManageEc2:
 
         filas_tabulate = []
         dict_id_ec2 = {}
-        
+
         for indice,reservation in enumerate(response["Reservations"],start=1):
 
             for instance in reservation["Instances"]:
-
                 dict_id_ec2[str(indice)] = (instance.get("InstanceId"))
                 fecha = instance.get("LaunchTime")
-                fecha_formateada = fecha.strftime("%Y/%m/%d %H:%M:%S")
-                                                
+                fecha_formateada = fecha.strftime("%Y/%m/%d %H:%M:%S")                              
                 nombre = "Sin nombre"
+                
                 for tag in instance.get("Tags",[]):
-
                     if tag.get("Key") == "Name":
                         nombre = tag.get("Value","Sin Nombre")
                         break
@@ -166,26 +161,13 @@ class ManageEc2:
                          fecha_formateada
                          ])
         return dict_id_ec2,filas_tabulate
-
-
-    def preparative(self)-> tuple[list,dict]:
-
-        flag,code = self.describe_ec2()
-
-        if not flag:
-            return flag,code
-
-        return self.format_data_ec2(code)
-        
-        
-
+      
     def waiter_for_state(self,instance_id:str,target_state:str)-> bool:
      
         waiter = self.ec2.get_waiter(f"instance_{target_state}")
         waiter.wait(InstanceIds=[instance_id])
         return True
-             
-    
+               
 if __name__ == "__main__":
     pass
     

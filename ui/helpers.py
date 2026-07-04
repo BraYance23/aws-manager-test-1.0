@@ -1,12 +1,12 @@
+import requests
 from tabulate import tabulate
 from colorama import init,Style,Fore
 from data import data_ec2 
-import requests
 
 def choice(dict_data:dict)-> str:
 
     while True:
-        choice = input("\nIngrese el numero del INDICE correspondiente al campo que desea seleccionar : ").strip()
+        choice = input("\nIngrese el numero INDICE de la opcion que desee : ").strip()
 
         if choice in dict_data:
 
@@ -65,37 +65,31 @@ MinCount = 2  → "pero necesito al menos 2\n""" + Style.RESET_ALL)
     name_ec2= input("Ingrese el nombre de la instancia : ").strip()
 
     return min_count,max_count,name_ec2
-
-            
+           
 def formate_region_name()-> list|dict:
 
     filas_tabulate = []
     dict_region_id = {}
 
-
-    for indice,(key,value) in enumerate(data_ec2.AWS_REGIONS.items(),start=1):
-         
+    for indice,(key,value) in enumerate(data_ec2.AWS_REGIONS.items(),start=1):  
         dict_region_id[str(indice)] = key
         filas_tabulate.append(
              [indice,
               value,
               key
-              ])
-        
+              ])    
     return filas_tabulate,dict_region_id
 
 def select_region_name():
      
     filas_tabulate,dict_region_name = formate_region_name()
-     
     header = data_ec2.header_region_name["header"]
     title = data_ec2.header_region_name["title"]
 
     display_table(filas_tabulate,header,title)
-
     region_name = choice(dict_region_name)
-    return region_name
-
+    location_name = data_ec2.AWS_REGIONS.get(region_name)
+    return region_name,location_name
 
 def handle_aws_error(code:str):
     """
@@ -183,15 +177,25 @@ def confirmation()-> bool:
 
         return choice == "s"
 
-def get_ip_public()-> bool|str:
+def get_ip_public()-> str:
 
-    try:
-
-        ip_public = requests.get("https://ifconfig.me").text.strip()
-
-        return ip_public + "/32"
-    except Exception:
-        return False
+    urls = [
+        "https://icanhazip.com",
+        "https://wtfismyip.com/text",
+        "https://ifconfig.me"
+        ]
+    
+    for url in urls:
+        try:
+            response = requests.get(url,timeout=3).text.strip()
+            if response:
+                ip_public = f"{response}/32"
+                return ip_public
+            continue
+        except requests.exceptions.Timeout:
+            continue
+        except Exception:
+            continue
 
 def choice_main(dict_options:dict)-> str:
 
@@ -204,7 +208,6 @@ def choice_main(dict_options:dict)-> str:
     
         return choice
 
-
 def display_table(data:list,header:list,title:str):
 
     print(title)
@@ -212,4 +215,4 @@ def display_table(data:list,header:list,title:str):
 
 
 if __name__ == "__main__":
-     select_region_name()
+    print(get_ip_public())
