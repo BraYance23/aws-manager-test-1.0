@@ -6,6 +6,7 @@ import logging
 def ec2_menu(manager):
 
     while True:
+
         options_ec2 =  data_ec2.main_ec2
         print("\n\n\tManage EC2\n")
 
@@ -14,7 +15,7 @@ def ec2_menu(manager):
 
         choice_ec2 = helpers.choice_main(options_ec2)
         match choice_ec2:
-
+            
             case "1":
                 manager.show_instances()
                 input("Presione enter para continuar")
@@ -34,11 +35,9 @@ def sg_menu(manager):
         print( f"Estas operando sobre grupo de seguridad : {Style.BRIGHT + manager.ADMIN_SG.sg_id + Style.RESET_ALL} \n")
 
         for clave,valor in option_sg.items():
-
             print(f"\t{clave}-{valor}")
 
         choice_sg = helpers.choice_main(option_sg)
-
         match choice_sg:
 
             case "1":
@@ -57,9 +56,9 @@ def kp_menu(manager):
     
     while True:
 
-        options_key_pair = data_ec2.main_key_pair
-                    
+        options_key_pair = data_ec2.main_key_pair            
         print("Manage Key Pairs\n")
+
         for clave,valor in options_key_pair.items():
             print(f"\t{clave}-{valor}")
 
@@ -87,7 +86,6 @@ def root_menu(matriz_dashboard,manager):
         helpers.display_table(matriz_dashboard,header,title)
         options_aws = data_ec2.main_aws
 
-
         for clave,valor in options_aws.items():
             print(f"|{clave}-{valor}")
 
@@ -97,7 +95,7 @@ def root_menu(matriz_dashboard,manager):
             case "1":
                 ec2_menu(manager)
             case "2":
-                 if not  manager.ADMIN_SG.sg_id:
+                 if not manager.ADMIN_SG.sg_id:
                     manager.change_sg_id()
                  sg_menu(manager)
             case "3":

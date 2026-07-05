@@ -4,7 +4,8 @@ from pathlib import Path
 def setup_logging() -> None:
 
     BASE_DIR = Path(__file__).parent.parent
-    PATH_LOG = BASE_DIR/"config"/"manager_aws.log"
+    PATH_LOG = BASE_DIR/"logs"/"manager_aws.log"
+    PATH_LOG.parent.mkdir(parents=True,exist_ok=True)
     
     logging.basicConfig(
         level=logging.INFO,

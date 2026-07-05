@@ -12,9 +12,9 @@ from data import data_ec2
 from ui import helpers
 
 
-
 logging_config.setup_logging()
 logger = logging.getLogger(__name__)
+
 class ManagerAWS:
 
     def __init__(self,region_name:str="us-east-1"):
@@ -82,7 +82,7 @@ class ManagerAWS:
         flag_response,response = self.ADMIN_EC2.describe_ec2()
 
         if not flag_response:
-            helpers.handle_aws_error(flag_response)
+            helpers.handle_aws_error(response)
             return
         
         dict_ec2_id,filas_tabulate = self.ADMIN_EC2.format_data_ec2(response)
@@ -267,12 +267,12 @@ class ManagerAWS:
             return
         
         deleted_successfully,delete_code = self.ADMIN_KEY.delete_key_pair(selected_key_pair)
-        logger.info()
 
         if not deleted_successfully:
             helpers.handle_aws_error(delete_code)
             return
 
+        logger.info(f"Se elimino la llave SSH : {selected_key_pair}.pem")
 #AMIS
 
     def select_type_ec2(self):
@@ -366,9 +366,9 @@ def main():
                 helpers.handle_aws_error(code)
                 return
 
-            matriz_dasboard = [[code.get("Account"),code.get("Arn"),location_name,manager.region_name]]
-            print(Fore.GREEN + "conexion exitosa :D" + Style.RESET_ALL)
-            exit = menu_services.root_menu(matriz_dasboard,manager)
+            matriz_dashboard = [[code.get("Account"),code.get("Arn"),location_name,manager.region_name]]
+            print(Fore.GREEN + "conexion exitosa :D\n\n" + Style.RESET_ALL)
+            exit = menu_services.root_menu(matriz_dashboard,manager)
             
             if exit:
                 return
@@ -378,3 +378,4 @@ def main():
                     
 if __name__ == "__main__":
     main()
+

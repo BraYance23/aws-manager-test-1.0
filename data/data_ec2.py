@@ -1,24 +1,79 @@
 from colorama import init,Style,Fore
 
 VERSION_OS = {
-            "Ubuntu": {
-    "20.04 LTS": {
-        "owner": "099720109477",
-        "filter": "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+    "Ubuntu": {
+        "20.04 LTS": {
+            "owner": "099720109477",
+            "filter": "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+        },
+        "22.04 LTS": {
+            "owner": "099720109477",
+            "filter": "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
+        },
+        "24.04 LTS": {
+            "owner": "099720109477",
+            "filter": "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"
+        }
     },
-    "22.04 LTS": {
-        "owner": "099720109477",
-        "filter": "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
+    "Windows": {
+        "Windows 2016": {
+            "owner": "amazon",
+            "filter": "Windows_Server-2016-English-Full-Base-*"
+        },
+        "Windows 2019": {
+            "owner": "amazon",
+            "filter": "Windows_Server-2019-English-Full-Base-*"
+        },
+        "Windows 2022": {
+            "owner": "amazon",
+            "filter": "Windows_Server-2022-English-Full-Base-*"
+        }
     },
-    "24.04 LTS": {
-        "owner": "099720109477",
-        "filter": "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"
+    "Amazon Linux": {
+        "2": {
+            "owner": "amazon",
+            "filter": "amzn2-ami-hvm-2.0.*-x86_64-gp2"
+        },
+        "2023": {
+            "owner": "amazon",
+            "filter": "al2023-ami-2023.*-x86_64"
+        }
+    },
+    "Debian": {
+        "Debian 11 Bullseye": {
+            "owner": "136693071363",
+            "filter": "debian-11-amd64-*"
+        },
+        "Debian 12 Bookworm": {
+            "owner": "136693071363",
+            "filter": "debian-12-amd64-*"
+        }
+    },
+    "Red Hat": {
+        "Red Hat 8": {
+            "owner": "309956199498",
+            "filter": "RHEL-8.*_HVM-*-x86_64-*"
+        },
+        "Red Hat 9": {
+            "owner": "309956199498",
+            "filter": "RHEL-9.*_HVM-*-x86_64-*"
+        }
+    },
+    "SUSE Linux": {
+    "SLES 15 SP7": {
+        "owner": "013907871322",
+        "filter": "suse-sles-15-sp7-v*-hvm-ssd-x86_64*"
+    },
+    "SLES 16": {
+        "owner": "013907871322",
+        "filter": "suse-sles-16-v*-hvm-ssd-x86_64*"
     }
-},
-                "Windows": {
-                    "2019":  {"owner": "amazon", "filter": "Windows_Server-2019*"},
-                    }
-                }
+}
+
+}
+
+
+
 
 AWS_REGIONS = {
     "us-east-1": "N. Virginia",
@@ -79,6 +134,11 @@ dict_type_instances = {sub[0]:sub[1] for sub in TYPES_INSTANCES}
 
 dict_os_general = {sub[0]:sub[1] for sub in OS_AVALIBLE}
 
+
+"""
+Encabezados y titulos para tabulate
+"""
+
 headers_types_ec2 =  {"header": [Style.BRIGHT + Fore.CYAN + "Indice",
                                  "Instancia",
                                  "vCPU","RAM",
@@ -87,7 +147,6 @@ headers_types_ec2 =  {"header": [Style.BRIGHT + Fore.CYAN + "Indice",
                                   "Free trier" + Style.RESET_ALL],
                     "title": "Tipos de instancias disponibles y costes"}
 
-
 header_region_name = {"header" :["INDICE",
                                      "Location Name",
                                      "Region ID"],
@@ -95,7 +154,6 @@ header_region_name = {"header" :["INDICE",
 
 header_dashboard = {"header": [Style.BRIGHT+"Account ID","ARN","Location Name","Region Name" + Style.RESET_ALL],
                     "title": "Datos asociados a su cuenta de AWS"}
-
 
 header_key_pair = {"header" : [Style.BRIGHT + "ID list",
                       Style.BRIGHT + Fore.CYAN + "Key name",
@@ -107,7 +165,6 @@ header_sg = {"header":  ["INDICE",
                         "Group ID",
                         "Descripcion"],
             "title":    "Grupos de seguridad existentes"}
-
 
 header_rules_sg = {"header" : [Style.BRIGHT + "INDICE",
                                 "Protocolo",
@@ -125,7 +182,6 @@ header_ec2 = {"header" : [Style.BRIGHT +"INDICE",
                           "IP publica",
                           "Fecha de lanzamiento" +Style.RESET_ALL],
             "title": "listado y descripcion de instancias :"}
-
 
 header_os_general = {"header" :["INDICE",
                                 "DISTRO",
@@ -146,6 +202,10 @@ header_selected_ami = {"header": ["INDICE",
                                       "Date creation"],
                       "title": "AMIS disponible :"}
 
+
+"""
+Control de flujo de servicios y orquestador
+"""
 
 main_aws = {"1": "Administrar EC2",
             "2": "Administar Security Groups",

@@ -69,8 +69,8 @@ class ManageAmi:
         for indice,valor in enumerate(data_ec2.VERSION_OS[election],start=1):
             filas_tabulate.append([indice,
                                   valor,
-                                  "x86",
-                                  "Canonical"
+                                  "x86_64",
+                                  "AMAZON"
                                   ])
             dict_distro[str(indice)] = valor
             
