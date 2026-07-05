@@ -8,10 +8,10 @@ def ec2_menu(manager):
     while True:
 
         options_ec2 =  data_ec2.main_ec2
-        print("\n\n\tManage EC2\n")
 
+        print(Style.BRIGHT + "\n\n  Manage EC2\n" + Style.RESET_ALL)
         for clave,valor in options_ec2.items():
-            print(f"{clave}-{valor}")
+            print(f"|{clave}-{valor}")
 
         choice_ec2 = helpers.choice_main(options_ec2)
         match choice_ec2:
@@ -31,11 +31,11 @@ def sg_menu(manager):
     while True:
 
         option_sg = data_ec2.main_sg
-        print("Manage Security Groups")
+        print(Style.BRIGHT + "\n\n  Manage Security Groups" + Style.RESET_ALL)
         print( f"Estas operando sobre grupo de seguridad : {Style.BRIGHT + manager.ADMIN_SG.sg_id + Style.RESET_ALL} \n")
 
         for clave,valor in option_sg.items():
-            print(f"\t{clave}-{valor}")
+            print(f"|{clave}-{valor}")
 
         choice_sg = helpers.choice_main(option_sg)
         match choice_sg:
@@ -57,10 +57,10 @@ def kp_menu(manager):
     while True:
 
         options_key_pair = data_ec2.main_key_pair            
-        print("Manage Key Pairs\n")
+        print(Style.BRIGHT + "\n\n  Manage Key Pairs\n" + Style.RESET_ALL)
 
         for clave,valor in options_key_pair.items():
-            print(f"\t{clave}-{valor}")
+            print(f"|{clave}-{valor}")
 
         choice_key_pair = helpers.choice_main(options_key_pair)
 

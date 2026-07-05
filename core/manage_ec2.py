@@ -34,16 +34,15 @@ class ManageEc2:
 
         try:
             sts = boto3.client("sts")
-
             response = sts.get_caller_identity()
-
             return True,response
 
         except NoCredentialsError:
             return False,"No se encontraron credenciales de AWS"
 
         except ClientError as e:
-            return False, e
+            code = e.response["Errror"]["Code"]
+            return False, code
 
     def run_ec2(self,config:dict)-> tuple[bool,str]:
 

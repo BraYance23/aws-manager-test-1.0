@@ -72,9 +72,6 @@ VERSION_OS = {
 
 }
 
-
-
-
 AWS_REGIONS = {
     "us-east-1": "N. Virginia",
     "us-east-2": "Ohio",

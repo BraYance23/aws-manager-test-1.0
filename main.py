@@ -57,6 +57,7 @@ class ManagerAWS:
         instance_id = helpers.choice(dict_id_ec2)
 
         mensaje_init,waiter,mensaje_fin = data_ec2.pameter_operation_ec2[selection]
+        
         if waiter == "terminated" and  not helpers.confirmation():
             print(Fore.YELLOW + "Operacion cancelada por el usuario" + Style.RESET_ALL)
             return
