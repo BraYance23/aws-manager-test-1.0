@@ -42,12 +42,12 @@ def request_ip_permissions(public_ip:str)-> dict:
             ]
         }
 
-def request_date_config_ec2()->tuple[int,int,str]:
+def request_data_config_ec2()->tuple[int,int,str]:
     
     while True:
          
         try:
-            print(Fore.GREEN +"""Explicacion de parametros minimo de instancias y maxino de instancias:
+            print(Fore.YELLOW +"""Explicacion de parametros minimo de instancias y maxino de instancias:
                   
 AWS intentara lanzar hasta maximo de instancias que le indiques, pero si no puede (por falta de capacidad),
 aceptara lanzar hasta llegar al minimo de instancias. Si no puede garantizar ni el mínimo, falla toda la operación.

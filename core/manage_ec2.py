@@ -46,7 +46,7 @@ class ManageEc2:
 
     def run_ec2(self,config:dict)-> tuple[bool,str]:
 
-        machine_type = config.get("TypeMachine")
+        type_machine = config.get("TypeMachine")
         ami_id = config.get("AmiId")
         name_instance = config.get("NameInstance")
         key_pair_name = config.get("KeyPairName")
@@ -58,7 +58,7 @@ class ManageEc2:
 
             response = self.ec2.run_instances(
                 ImageId = ami_id,
-                InstanceType = machine_type,
+                InstanceType = type_machine,
                 MinCount = min_count,
                 MaxCount = max_count,
                 KeyName = key_pair_name,

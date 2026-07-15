@@ -65,9 +65,7 @@ class ManageKeyPairs:
     def request_name_key(self)-> str:
 
         while True:
-        
             name_key = input("Ingre el nombre de la llave que desea crear : ").strip()
-
             if name_key:
                 return name_key
             

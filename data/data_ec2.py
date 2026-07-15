@@ -141,7 +141,7 @@ headers_types_ec2 =  {"header": [Style.BRIGHT + Fore.CYAN + "Indice",
                                  "vCPU","RAM",
                                  "$/hora",
                                  "$/mes",
-                                  "Free trier" + Style.RESET_ALL],
+                                  "Free Tier" + Style.RESET_ALL],
                     "title": "Tipos de instancias disponibles y costes"}
 
 header_region_name = {"header" :["INDICE",
@@ -169,7 +169,8 @@ header_rules_sg = {"header" : [Style.BRIGHT + "INDICE",
                                 "Puerto fin",
                                 "Cdir IP",
                                 "Descripción" + Style.RESET_ALL],
-                    "title": "Reglas de entradas existentes: "}
+                    "title_ingress": "Reglas de entrada existentes: ",
+                    "title_egress": "Reglas de salida existentes: "}
 
 header_ec2 = {"header" : [Style.BRIGHT +"INDICE",
                           "Nombre EC2",
@@ -187,7 +188,7 @@ header_os_general = {"header" :["INDICE",
 
 header_os_version = {"header":["INDICE",
                                     "Distros",
-                                    "Arquictectura",
+                                    "Arquitectura",
                                     "Distribuidor"],
                      "title": "Versiones del sistema operativo seleccionado : "}
 
@@ -219,10 +220,14 @@ main_ec2 = {"1": "Listar instancias",
             "7": "Volver al menu principal"}
 
 main_sg = {"1": "Listar reglas de entrada",
-           "2": "Agregar regla de entrada",
-           "3": "Eliminar regla de entrada",
-           "4": "Cambiar grupo de seguridad",
-           "5": "Volver al menu principal"}
+           "2": "Listar reglas de salida",
+           "3": "Agregar regla de entrada",
+           "4": "Eliminar regla de entrada",
+           "5": "Agregar regla de salidad",
+           "6": "Eliminar reglada de entrada",
+           "7": "Cambiar grupo de seguridad",
+           "8": "Volver al menu principal"
+           }
 
 main_key_pair = {"1": "Listar llaves SSH",
                  "2": "Crear llave SSH",

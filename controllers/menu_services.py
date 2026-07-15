@@ -32,24 +32,31 @@ def sg_menu(manager):
 
         option_sg = data_ec2.main_sg
         print(Style.BRIGHT + "\n\n  Manage Security Groups" + Style.RESET_ALL)
-        print( f"Estas operando sobre grupo de seguridad : {Style.BRIGHT + manager.ADMIN_SG.sg_id + Style.RESET_ALL} \n")
+        print( f"Estas operando sobre grupo de seguridad : {Style.BRIGHT + manager.security_groups.sg_id + Style.RESET_ALL} \n")
 
         for clave,valor in option_sg.items():
             print(f"|{clave}-{valor}")
 
-        choice_sg = helpers.choice_main(option_sg)
-        match choice_sg:
+        choice_operation = helpers.choice_main(option_sg)
+        match choice_operation:
 
             case "1":
-                manager.show_rules_sg()
+                manager.show_rules_sg(direction="ingress")
                 input("Presione enter para continuar.")
             case "2":
-                manager.autorize_sg_ingress()
+                manager.show_rules_sg(direction="egress")
+                input("Presione enter para continuar.")    
             case "3":
-                manager.revoke_sg_ingress()
+                manager.autorize_sg_ingress(direction = "ingress")
             case "4":
-                manager.change_sg_id()
+                manager.revoke_sg_ingress(direction = "ingress")
             case "5":
+                manager.autorize_sg_egress(direction = "egress")
+            case "6":
+                manager.revoke_sg_egress(direction = "egress")
+            case "7":
+                manager.change_sg_id()
+            case "8":
                 break
 
 def kp_menu(manager):
@@ -95,7 +102,7 @@ def root_menu(matriz_dashboard,manager):
             case "1":
                 ec2_menu(manager)
             case "2":
-                 if not manager.ADMIN_SG.sg_id:
+                 if not manager.security_groups.sg_id:
                     manager.change_sg_id()
                  sg_menu(manager)
             case "3":

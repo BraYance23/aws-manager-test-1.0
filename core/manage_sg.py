@@ -1,4 +1,5 @@
 import boto3
+import json
 from botocore.exceptions import ClientError,NoCredentialsError
 import logging
 
@@ -18,6 +19,7 @@ class ManageSecurityGroup:
             response = self.ec2.describe_security_groups(
                 GroupIds=[sg_id]
             )
+            #input(json.dumps(response,default=str,indent=2))
             return True,response
         
 
@@ -28,36 +30,64 @@ class ManageSecurityGroup:
         except NoCredentialsError:
             return False,"No se encontraron credenciales"
 
-
     def formata_data_sg_rules(self,response:dict)-> tuple[list,dict]:
 
-        filas_tabulate = []
-        dict_rules_sg = {}
+        filas_tabulate_ingress = []
+        filas_tabulate_egress = []
+        dict_rules_ingress = {}
+        dict_rules_egress = {}
 
-        for securiry in response["SecurityGroups"]:
-
-      
-            for indice,rule in enumerate(securiry["IpPermissions"],start=1):
+        for security in response["SecurityGroups"]:
+                
+            for indice,rule in enumerate(security["IpPermissions"],start=1):
          
-                    for ip_ranges in rule["IpRanges"]:
+                for ip_ranges in rule["IpRanges"]:
 
-                        dict_rules_sg[str(indice)] = {
+                    dict_rules_ingress[str(indice)] = {
 
-                            "IpProtocol":rule.get("IpProtocol","N/A."),
-                            "FromPort": rule.get("FromPort",-1),
-                            "ToPort": rule.get("ToPort",-1),
-                            "IpRanges": [{"CidrIp" : ip_ranges.get("CidrIp","Sin CidrIp."),
-                                        "Description": ip_ranges.get("Description","Sin descipcion.")}]
+                        "IpProtocol":rule.get("IpProtocol","N/A."),
+                        "FromPort": rule.get("FromPort",-1),
+                        "ToPort": rule.get("ToPort",-1),
+                        "IpRanges": [{"CidrIp" : ip_ranges.get("CidrIp","Sin CidrIp."),
+                                    "Description": ip_ranges.get("Description","Sin descipcion.")}]
+                                    }
+                            
+                    filas_tabulate_ingress.append([indice,
+                                    rule.get("IpProtocol","Sin protocolo").upper(),
+                                    rule.get("FromPort","ALL"),
+                                    rule.get("ToPort","ALL"),
+                                    ip_ranges.get("CidrIp","Sin CidrIp"),
+                                    ip_ranges.get("Description","Sin descripción")
+                                    ])
+                    
+            for indice,rule_egress in enumerate(security["IpPermissionsEgress"],start=1):
+
+                 for ip_ranges_egress in rule_egress["IpRanges"]:
+
+                        dict_rules_egress[str(indice)] = {
+
+                            "IpProtocol":rule_egress.get("IpProtocol","N/A."),
+                            "FromPort": rule_egress.get("FromPort","ALL"),
+                            "ToPort": rule_egress.get("ToPort","ALL"),
+                            "IpRanges": [{"CidrIp" : ip_ranges_egress.get("CidrIp","Sin CidrIp."),
+                                        "Description": ip_ranges_egress.get("Description","Sin descipcion.")}]
                                         }
-                                
-                        filas_tabulate.append([indice,
-                                        rule.get("IpProtocol","Sin protocolo").upper(),
-                                        rule.get("FromPort",-1),
-                                        rule.get("ToPort",-1),
-                                        ip_ranges.get("CidrIp","Sin CidrIp"),
-                                        ip_ranges.get("Description","Sin descripción")
+                        
+                        filas_tabulate_egress.append([indice,
+                                        rule_egress.get("IpProtocol","Sin protocolo").upper(),
+                                        rule_egress.get("FromPort","ALL"),
+                                        rule_egress.get("ToPort","ALL"),
+                                        ip_ranges_egress.get("CidrIp","Sin CidrIp"),
+                                        ip_ranges_egress.get("Description","Sin descripción")
                                         ])
-        return filas_tabulate,dict_rules_sg
+
+
+        return {
+            "filas_tabulate_ingress": filas_tabulate_ingress,
+            "filas_tabulate_egress": filas_tabulate_egress,
+            "dict_rules_ingress": dict_rules_ingress,
+            "dict_rules_egress": dict_rules_egress
+            }
 
     def format_data_sg_general(self,response:dict)-> tuple[list,dict]:
 
@@ -75,7 +105,6 @@ class ManageSecurityGroup:
         
         return filas_tabulate,dict_sg_id
 
-
     def authorize_rule_ingress(self,ip_permissions:list)-> tuple[bool,str]:
 
         
@@ -92,7 +121,7 @@ class ManageSecurityGroup:
 
         except NoCredentialsError:
             return False,"No se encontraron credenciales"
-    
+          
     def remove_rule_ingress(self,ip_permissions:list)-> tuple[bool,dict | str]:
 
         
@@ -112,6 +141,42 @@ class ManageSecurityGroup:
         
         except NoCredentialsError:
             return False,"No se encontraron credenciales"
+
+    def authorize_rule_egress(self,ip_permissions:list)-> tuple[bool,str]:
     
+        try:
+            self.ec2.authorize_security_group_egress(
+                GroupId = self.sg_id,
+                IpPermissions = [ip_permissions]
+            )
+            return True,ip_permissions
+
+        except ClientError as error:
+            code = error.response["Error"]["Code"]
+            return False,code
+
+        except NoCredentialsError:
+            return False,"No se encontraron credenciales"
+            
+    def remove_rule_egress(self,ip_permissions:list)-> tuple[bool,dict | str]:
+
+        try:
+            for valor in ip_permissions["IpRanges"]:
+                del valor["Description"]        
+                
+            self.ec2.revoke_security_group_egress(
+                GroupId = self.sg_id,
+                IpPermissions = [ip_permissions]
+                        )
+            return True,ip_permissions
+                        
+        except ClientError as error:
+            code = error.response['Error']['Code']
+            return False,code
+        
+        except NoCredentialsError:
+            return False,"No se encontraron credenciales"
+        
+
 if __name__ == "__main__":
     pass
