@@ -41,7 +41,7 @@ class ManageEc2:
             return False,"No se encontraron credenciales de AWS"
 
         except ClientError as e:
-            code = e.response["Errror"]["Code"]
+            code = e.response["Error"]["Code"]
             return False, code
 
     def run_ec2(self,config:dict)-> tuple[bool,str]:

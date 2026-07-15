@@ -146,7 +146,7 @@ class ManagerAWS:
             print(f"No hay reglas de salida existentes en esta region : {self.region_name}")
         
               
-    def autorize_sg_ingress(self,option):
+    def autorize_sg_ingress(self,direction):
 
         ip_public = helpers.get_ip_public()
 
@@ -167,7 +167,7 @@ class ManagerAWS:
         print(Fore.GREEN + f"Puerto: {ip_permissions['FromPort']} abierto con exito en : {self.security_groups.sg_id}" + Style.RESET_ALL)
         logger.info(f"Autorize_ingress en SG ID: {self.security_groups.sg_id}\nRegla : {format_ip_permissions}")
         input("Presione enter para listar las reglas actualizadas.")
-        self.show_rules_sg(option)
+        self.show_rules_sg(direction)
 
     def autorize_sg_egress(self,direction):
 
@@ -221,7 +221,7 @@ class ManagerAWS:
                 logger.error(f"Fallo en revoke_ingress | SG ID : {self.security_groups.sg_id} | CODE : {code_or_rule}")
                 return
 
-        format_ip_permissions = json.dumps(selected_rule,indent=2,default=2)
+        format_ip_permissions = json.dumps(selected_rule,indent=2,default=str)
         logger.info(f"Revoke ingress en SG ID : {self.security_groups.sg_id}\nRegla : {format_ip_permissions}")
         print(Fore.GREEN +f"Puerto : {code_or_rule['ToPort']} eliminado con exito de : {self.security_groups.sg_id}" + Style.RESET_ALL)
 
@@ -251,11 +251,11 @@ class ManagerAWS:
 
         if not flag_rules_ingress:
                 helpers.handle_aws_error(code_or_rule)
-                logger.error(f"Fallo en revoke_ingress | SG ID : {self.security_groups.sg_id} | CODE : {code_or_rule}")
+                logger.error(f"Fallo en revoke_egress | SG ID : {self.security_groups.sg_id} | CODE : {code_or_rule}")
                 return
 
-        format_ip_permissions = json.dumps(selected_rule,indent=2,default=2)
-        logger.info(f"Revoke ingress en SG ID : {self.security_groups.sg_id}\nRegla : {format_ip_permissions}")
+        format_ip_permissions = json.dumps(selected_rule,indent=2,default=str)
+        logger.info(f"Revoke egress en SG ID : {self.security_groups.sg_id}\nRegla : {format_ip_permissions}")
         print(Fore.GREEN +f"Puerto : {code_or_rule['ToPort']} eliminado con exito de : {self.security_groups.sg_id}" + Style.RESET_ALL)
 
     def change_sg_id(self):
