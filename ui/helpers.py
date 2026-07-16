@@ -16,7 +16,6 @@ def choice(dict_data:dict)-> str:
         
         print(Fore.YELLOW + "Valor ingresado no esta en el rango valido." + Style.RESET_ALL)
     
-
 def request_ip_permissions(public_ip:str)-> dict:
 
 
@@ -45,28 +44,44 @@ def request_ip_permissions(public_ip:str)-> dict:
             ]
         }
 
+def ask_int(prompt:str, value_min : int = 1, value_max : int = 100):
+
+    while True:
+
+        try:
+            value = int(input(prompt))
+
+            if value < value_min:
+                print(Fore.YELLOW + f"El valor debe ser mayor a : {value_min}" + Style.RESET_ALL)
+                continue
+            elif value > value_max:
+                print(Fore.YELLOW + f"El Maximo de instancias permitido es : {value_max}" + Style.RESET_ALL)
+                continue
+            return value
+        except ValueError:
+            print(Fore.YELLOW + "Solo ingresar valores numericos." + Style.RESET_ALL)
+    
 def request_data_config_ec2()->tuple[int,int,str]:
     
-    while True:
-         
-        try:
-            print(Fore.YELLOW +"""Explicacion de parametros minimo de instancias y maxino de instancias:
+    name_ec2= input(Style.BRIGHT + "Ingrese el nombre de la instancia : " + Style.RESET_ALL).strip()
+
+    print(Fore.YELLOW +"""\n\nExplicacion de parametros minimo de instancias y maxino de instancias:
                   
 AWS intentara lanzar hasta maximo de instancias que le indiques, pero si no puede (por falta de capacidad),
 aceptara lanzar hasta llegar al minimo de instancias. Si no puede garantizar ni el mínimo, falla toda la operación.
                   
 MaxCount = 5  → "quiero hasta 5"
 MinCount = 2  → "pero necesito al menos 2\n""" + Style.RESET_ALL)
+     
+    while True:
 
-    
-            min_count = int(input("Ingrese el minimo de instancias que desea desplegar : "))
-            max_count = int(input("Ingrese el maximo de instancias que desea desplegar : "))
+        min_count = ask_int(prompt="Ingrese el minimo de instancias que desea desplegar : ")
+        max_count = ask_int(prompt="Ingrese el maximo de instancias que desea desplegar : ")
+
+        if max_count > min_count:
             break
-        except ValueError:
-             print("Solo ingresar valores numericos")
-
-    name_ec2= input("Ingrese el nombre de la instancia : ").strip()
-
+        print(Fore.YELLOW + "\nError: El máximo debe ser mayor o igual al mínimo. Intente de nuevo.\n" + Style.RESET_ALL)
+        
     return min_count,max_count,name_ec2
            
 def formate_region_name()-> list|dict:
