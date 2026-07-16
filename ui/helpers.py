@@ -178,7 +178,7 @@ def confirmation()-> bool:
             print(Fore.YELLOW + "Valor ingresado no valido, por favor confirmar operacion." + Style.RESET_ALL)
             continue
 
-        return choice == "s"
+        return choice == "S"
 
 def get_ip_public()-> str:
 

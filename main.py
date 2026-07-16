@@ -287,20 +287,20 @@ class ManagerAWS:
 
         if not flag:
             helpers.handle_aws_error(response)
-            return "ERROR",None
+            return False
         
         dict_key,filas_tabulate = self.key_pair.format_data(response)
 
         if not filas_tabulate:
             print(f"No hay llaves SSH existentes en esta region : {self.region_name}")
-            return "EMPTY",None
+            return False
 
         headers = data_ec2.header_key_pair["header"]
         title = data_ec2.header_key_pair["title"]
 
         helpers.display_table(filas_tabulate,headers,title)
         selected_key = helpers.choice(dict_key)
-        return "SUCCESS",selected_key
+        return selected_key
     
     def generate_key_pairs(self):
 
@@ -325,26 +325,23 @@ class ManagerAWS:
 
     def delete_key_pairs(self):
   
-        status,data = self.select_key_pair()
+        key_selected  = self.select_key_pair()
 
-        match status:
+        if not key_selected:
+                return
+        
+        confirmation = helpers.confirmation()
 
-            case "ERROR":
+        if not confirmation:
+                print("Operacion cancelada")
                 return
-            case "EMPTY":
-                return
-            case "SUCCESS":
-                confirmation = helpers.confirmation()
-                if not confirmation:
-                    print("Operacion cancelada")
-                    return
                 
-                deleted_successfully,delete_code = self.key_pair.delete_key_pair(data)
+        deleted_successfully,delete_code = self.key_pair.delete_key_pair(key_selected)
 
-                if not deleted_successfully:
-                    helpers.handle_aws_error(delete_code)
-                    return
-                logger.info(f"Se elimino la llave SSH : {data}.pem")
+        if not deleted_successfully:
+            helpers.handle_aws_error(delete_code)
+            return
+        logger.info(f"Se elimino la llave SSH : {key_selected}.pem")
 
 #AMIS
 
