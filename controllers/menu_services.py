@@ -91,12 +91,12 @@ def root_menu(matriz_dashboard,manager):
 
         print(Style.BRIGHT + f"\tBienvenido a Manage AWS \n" + Style.RESET_ALL)
         helpers.display_table(matriz_dashboard,header,title)
-        options_aws = data_ec2.main_aws
+        options_root = data_ec2.main_root
 
-        for clave,valor in options_aws.items():
+        for clave,valor in options_root.items():
             print(f"|{clave}-{valor}")
 
-        choice_aws = helpers.choice_main(options_aws)
+        choice_aws = helpers.choice_main(options_root)
         match choice_aws:
 
             case "1":

@@ -212,7 +212,7 @@ class ManagerAWS:
         confirmation = helpers.confirmation()
 
         if not confirmation:
-            print("Operacion cancelada")
+            print(Fore.GREEN + "Operacion cancelada" + Style.RESET_ALL)
             return
         flag_rules_ingress,code_or_rule = self.security_groups.remove_rule_ingress(selected_rule)
 

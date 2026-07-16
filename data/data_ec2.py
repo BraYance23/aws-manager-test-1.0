@@ -136,7 +136,7 @@ dict_os_general = {sub[0]:sub[1] for sub in OS_AVALIBLE}
 Encabezados y titulos para tabulate
 """
 
-headers_types_ec2 =  {"header": [Style.BRIGHT + Fore.CYAN + "Indice",
+headers_types_ec2 =  {"header": [Style.BRIGHT + "INDICE",
                                  "Instancia",
                                  "vCPU","RAM",
                                  "$/hora",
@@ -144,23 +144,26 @@ headers_types_ec2 =  {"header": [Style.BRIGHT + Fore.CYAN + "Indice",
                                   "Free Tier" + Style.RESET_ALL],
                     "title": "Tipos de instancias disponibles y costes"}
 
-header_region_name = {"header" :["INDICE",
+header_region_name = {"header" :[Style.BRIGHT + "INDICE",
                                      "Location Name",
-                                     "Region ID"],
+                                     "Region ID" + Style.RESET_ALL],
                      "title": "Regiones disponibles para administrar"}
 
-header_dashboard = {"header": [Style.BRIGHT+"Account ID","ARN","Location Name","Region Name" + Style.RESET_ALL],
+header_dashboard = {"header": [Style.BRIGHT+"Account ID",
+                               "ARN","Location Name",
+                               "Region Name" + Style.RESET_ALL],
+
                     "title": "Datos asociados a su cuenta de AWS"}
 
 header_key_pair = {"header" : [Style.BRIGHT + "ID list",
-                      Style.BRIGHT + Fore.CYAN + "Key name",
-                      Style.BRIGHT + Fore.CYAN + "Key Pair ID",
-                      Style.BRIGHT + Fore.CYAN +"Create Time" + Style.RESET_ALL],
+                      "Key name",
+                      "Key Pair ID",
+                      "Create Time" + Style.RESET_ALL],
                   "title": "Llaves SSH existentes"}
 
-header_sg = {"header":  ["INDICE",
+header_sg = {"header":  [Style.BRIGHT + "INDICE",
                         "Group ID",
-                        "Descripcion"],
+                        "Descripcion" + Style.RESET_ALL],
             "title":    "Grupos de seguridad existentes"}
 
 header_rules_sg = {"header" : [Style.BRIGHT + "INDICE",
@@ -181,23 +184,23 @@ header_ec2 = {"header" : [Style.BRIGHT +"INDICE",
                           "Fecha de lanzamiento" +Style.RESET_ALL],
             "title": "listado y descripcion de instancias :"}
 
-header_os_general = {"header" :["INDICE",
+header_os_general = {"header" :[Style.BRIGHT + "INDICE",
                                 "DISTRO",
-                                "ARQUITECTURA"],
+                                "ARQUITECTURA" + Style.RESET_ALL],
                     "title": "Selecciones el tipo de sistema operativo que desea desplegar :"}
 
-header_os_version = {"header":["INDICE",
+header_os_version = {"header":[Style.BRIGHT + "INDICE",
                                     "Distros",
                                     "Arquitectura",
-                                    "Distribuidor"],
+                                    "Distribuidor" + Style.RESET_ALL],
                      "title": "Versiones del sistema operativo seleccionado : "}
 
-header_selected_ami = {"header": ["INDICE",
+header_selected_ami = {"header": [Style.BRIGHT + "INDICE",
                                       "ID AMI",
                                       "Name ",
                                       "Architecture",
                                       "Free tier",
-                                      "Date creation"],
+                                      "Date creation" + Style.RESET_ALL],
                       "title": "AMIS disponible :"}
 
 
@@ -205,7 +208,7 @@ header_selected_ami = {"header": ["INDICE",
 Control de flujo de servicios y orquestador
 """
 
-main_aws = {"1": "Administrar EC2",
+main_root = {"1": "Administrar EC2",
             "2": "Administar Security Groups",
             "3": "Administar Key Pairs",
             "4": "Cambiar de region",

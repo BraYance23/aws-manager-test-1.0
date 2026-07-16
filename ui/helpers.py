@@ -6,12 +6,15 @@ from data import data_ec2
 def choice(dict_data:dict)-> str:
 
     while True:
-        choice = input("\nIngrese el numero INDICE de la opcion que desee : ").strip()
+        choice = input(Style.BRIGHT + "\nIngrese el numero INDICE de la opcion que desee : " + Style.RESET_ALL).strip()
 
-        if choice in dict_data:
-
+        if not choice:
+            print(Fore.YELLOW + f"Valor ingresado vacio,por favor ingresar una opción." + Style.RESET_ALL)
+            continue
+        elif choice in dict_data:
             return dict_data[choice]
-        print("Valor ingresado no es valido o no esta en el rango valido.")
+        
+        print(Fore.YELLOW + "Valor ingresado no esta en el rango valido." + Style.RESET_ALL)
     
 
 def request_ip_permissions(public_ip:str)-> dict:
@@ -169,10 +172,10 @@ def handle_aws_error(code:str):
 def confirmation()-> bool:
 
     while True:
-        choice = input(Fore.RED + "Esta acción es irreversible, desea continuar S/N: "+ Style.RESET_ALL).strip().lower()
+        choice = input(Style.BRIGHT + Fore.RED + "Esta acción es irreversible, desea continuar S/N: "+ Style.RESET_ALL).strip().upper()
 
-        if "s" != choice != "n":
-            print("Valor ingresado no valido, por favor confirmar operacion.")
+        if "S" != choice != "N":
+            print(Fore.YELLOW + "Valor ingresado no valido, por favor confirmar operacion." + Style.RESET_ALL)
             continue
 
         return choice == "s"
@@ -200,12 +203,14 @@ def get_ip_public()-> str:
 def choice_main(dict_options:dict)-> str:
 
     while True:
-        choice = input("\nIngrese la opcion que desee : ")
+        choice = input(Style.BRIGHT + "\nIngrese la opcion que desee : " + Style.RESET_ALL)
 
-        if not choice in dict_options:
-            print("Opcion ingresada no valida.")
+        if not choice:
+            print(Fore.YELLOW + f"Valor ingresado vacio,por favor ingresar una opción." + Style.RESET_ALL)
             continue
-    
+        elif not choice in dict_options:
+            print(Fore.YELLOW + "Valor ingresado no esta en el rango valido." + Style.RESET_ALL)
+            continue
         return choice
 
 def display_table(data:list,header:list,title:str):

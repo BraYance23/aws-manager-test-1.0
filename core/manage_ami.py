@@ -1,8 +1,8 @@
-import boto3
+import logging
 from datetime import datetime
+import boto3
 from botocore.exceptions import ClientError,NoCredentialsError
 from data import data_ec2
-import logging
 
 
 logger = logging.getLogger(__name__)
