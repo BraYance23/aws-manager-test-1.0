@@ -19,10 +19,8 @@ class ManageSecurityGroup:
             response = self.ec2.describe_security_groups(
                 GroupIds=[sg_id]
             )
-            #input(json.dumps(response,default=str,indent=2))
             return True,response
         
-
         except ClientError as e:
             code = e.response["Error"]["Code"]
             return False,code

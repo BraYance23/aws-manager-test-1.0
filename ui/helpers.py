@@ -1,3 +1,4 @@
+import json
 import requests
 from tabulate import tabulate
 from colorama import init,Style,Fore
@@ -31,7 +32,7 @@ def request_ip_permissions(public_ip:str)-> dict:
         elif to_port >= from_port:
             break
 
-        print(Fore.YELLOW + "El puerto de inicio no puede mayor al puerto fin." + Style.RESET_ALL)
+        print(Fore.YELLOW + "El puerto de inicio no puede ser mayor al puerto fin." + Style.RESET_ALL)
         continue     
 
     cidr_ip = input("CIDR IP (ej: 0.0.0.0/0 o ingresa \"1\" para colocar automaticamente su ip publica) : ").strip()
@@ -48,6 +49,18 @@ def request_ip_permissions(public_ip:str)-> dict:
                 }
             ]
         }
+
+def confirmation_config(data:dict,title:str="")-> bool:
+
+    print(Style.BRIGHT + f"\n\t{title}" + Style.RESET_ALL)
+    print(json.dumps(data,indent=2,default=str))
+    while True:
+        confirmation_user = input(Style.BRIGHT + "\nLos datos ingresados son correctos? S/N: " + Style.RESET_ALL ).strip().upper()
+
+        if "S" != confirmation_user != "N":
+                print(Fore.YELLOW + "Valor ingresado no valido, por favor confirmar operacion." + Style.RESET_ALL)
+                continue
+        return confirmation_user == "S"
 
 def ask_int(prompt:str,value_min:int = 1,value_max:int = 100,msg_max:str="")-> int:
 

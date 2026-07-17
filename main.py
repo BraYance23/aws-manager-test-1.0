@@ -28,7 +28,12 @@ class ManagerAWS:
 
     def run_ec2(self):
         
-        config_instace = self.request_data_run_instance()       
+        while True:
+            config_instace = self.request_data_run_instance()
+            confirmation = helpers.confirmation_config(config_instace,title="Configuracion de instancia a desplegar")
+            if confirmation:
+                break
+
         flag,code = self.ec2.run_ec2(config_instace)
 
         if not flag:
@@ -150,11 +155,11 @@ class ManagerAWS:
 
         ip_public = helpers.get_ip_public()
 
-        ip_permissions = helpers.request_ip_permissions(ip_public)
-
-        if not  ip_permissions:
-            print("Operacion cancelada")
-            return
+        while True:
+            ip_permissions = helpers.request_ip_permissions(ip_public)
+            confirmation = helpers.confirmation_config(data=ip_permissions,title="Regla de entrada a crear")
+            if confirmation:
+                break
 
         flag,code_or_rule = self.security_groups.authorize_rule_ingress(ip_permissions)
 
@@ -173,11 +178,11 @@ class ManagerAWS:
 
         ip_public = helpers.get_ip_public()
 
-        ip_permissions = helpers.request_ip_permissions(ip_public)
-
-        if not  ip_permissions:
-            print("Operacion cancelada")
-            return
+        while True:
+            ip_permissions = helpers.request_ip_permissions(ip_public)
+            confirmation = helpers.confirmation_config(data=ip_permissions,title="Regla de salida a crear")
+            if confirmation:
+                break
 
         flag,code_or_rule = self.security_groups.authorize_rule_egress(ip_permissions)
 
@@ -404,7 +409,7 @@ class ManagerAWS:
         sg_id = self.inject_sg_id()
         min_count,max_count,name_instance = helpers.request_data_config_ec2()
 
-        return {
+        return{
             "TypeMachine": type_machine,
             "AmiId": ami_id,
             "NameInstance": name_instance,
@@ -412,7 +417,7 @@ class ManagerAWS:
             "SecurityGroupsId": sg_id,
             "MinCount": min_count,
             "MaxCount": max_count
-        }
+            }
 
 def main():
 
