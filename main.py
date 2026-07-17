@@ -1,6 +1,7 @@
 import json
 import time
 import logging
+from dotenv import load_dotenv
 from config import logging_config
 from colorama import init,Style,Fore
 from core.manage_key_pair import ManageKeyPairs
@@ -17,12 +18,15 @@ logger = logging.getLogger(__name__)
 
 class ManagerAWS:
 
+
     def __init__(self,region_name:str="us-east-1"):
+        load_dotenv()
         self.region_name = region_name
         self.ec2 = ManageEc2(self.region_name)
         self.ami = ManageAmi(self.region_name)
         self.key_pair = ManageKeyPairs(self.region_name)
         self.security_groups = ManageSecurityGroup(self.region_name)
+
 
 #Instancias:
 
