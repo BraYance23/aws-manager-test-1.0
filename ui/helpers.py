@@ -103,7 +103,7 @@ MinCount = 2  → "pero necesito al menos 2\n""" + Style.RESET_ALL)
         
     return min_count,max_count,name_ec2
            
-def formate_region_name()-> list|dict:
+def formate_region_name()-> tuple[list|dict]:
 
     filas_tabulate = []
     dict_region_id = {}
@@ -214,7 +214,7 @@ def confirmation()-> bool:
 
         return choice == "S"
 
-def get_ip_public()-> str:
+def get_ip_public()-> str|None:
 
     urls = [
         "https://icanhazip.com",
@@ -233,6 +233,7 @@ def get_ip_public()-> str:
             continue
         except Exception:
             continue
+    return None
 
 def choice_main(dict_options:dict)-> str:
 

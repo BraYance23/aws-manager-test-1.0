@@ -1,4 +1,5 @@
 from colorama import init,Style,Fore
+from schemas import DictHeaderRulesSG
 
 VERSION_OS = {
     "Ubuntu": {
@@ -166,7 +167,7 @@ header_sg = {"header":  [Style.BRIGHT + "INDICE",
                         "Descripcion" + Style.RESET_ALL],
             "title":    "Grupos de seguridad existentes"}
 
-header_rules_sg = {"header" : [Style.BRIGHT + "INDICE",
+header_rules_sg:DictHeaderRulesSG = {"header" : [Style.BRIGHT + "INDICE",
                                 "Protocolo",
                                 "Puerto inicio",
                                 "Puerto fin",

@@ -27,7 +27,6 @@ class ManagerAWS:
         self.key_pair = ManageKeyPairs(self.region_name)
         self.security_groups = ManageSecurityGroup(self.region_name)
 
-
 #Instancias:
 
     def run_ec2(self):
@@ -127,13 +126,13 @@ class ManagerAWS:
             
     def show_rules_sg(self,direction:str):
 
-
         flag_response,response = self.security_groups.get_rules_sg(self.security_groups.sg_id)
-
         if not flag_response:
+            assert isinstance(response,str)
             helpers.handle_aws_error(response)
             return
 
+        assert isinstance(response,dict)
         data_sg = self.security_groups.formata_data_sg_rules(response)
 
         filas_tabulate_ingress = data_sg.get("filas_tabulate_ingress")

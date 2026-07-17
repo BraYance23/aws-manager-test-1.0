@@ -1,7 +1,7 @@
 import boto3
-import json
 from botocore.exceptions import ClientError,NoCredentialsError
 import logging
+from schemas import DictFormatSGRules
 
 
 logger = logging.getLogger(__name__)
@@ -13,7 +13,7 @@ class ManageSecurityGroup:
         self.ec2 = boto3.client("ec2",region_name=region_name)
         self.sg_id = None
  
-    def get_rules_sg(self,sg_id:str = "")-> tuple[bool,dict | str]:
+    def get_rules_sg(self,sg_id:str | None = "")-> tuple[bool,dict | str]:
 
         try:
             response = self.ec2.describe_security_groups(
@@ -28,7 +28,7 @@ class ManageSecurityGroup:
         except NoCredentialsError:
             return False,"No se encontraron credenciales"
 
-    def formata_data_sg_rules(self,response:dict)-> tuple[list,dict]:
+    def formata_data_sg_rules(self,response:dict)-> dict[str, dict | list]:
 
         filas_tabulate_ingress = []
         filas_tabulate_egress = []
@@ -87,7 +87,7 @@ class ManageSecurityGroup:
             "dict_rules_egress": dict_rules_egress
             }
 
-    def format_data_sg_general(self,response:dict)-> tuple[list,dict]:
+    def format_data_sg_general(self,response:dict)-> DictFormatSGRules:
 
         dict_sg_id = {}
         filas_tabulate = []
@@ -103,7 +103,7 @@ class ManageSecurityGroup:
         
         return filas_tabulate,dict_sg_id
 
-    def authorize_rule_ingress(self,ip_permissions:list)-> tuple[bool,str]:
+    def authorize_rule_ingress(self,ip_permissions:dict)-> tuple[bool,dict | str]:
 
         
         try:
@@ -120,7 +120,7 @@ class ManageSecurityGroup:
         except NoCredentialsError:
             return False,"No se encontraron credenciales"
           
-    def remove_rule_ingress(self,ip_permissions:list)-> tuple[bool,dict | str]:
+    def remove_rule_ingress(self,ip_permissions:dict)-> tuple[bool,dict | str]:
 
         
         try:
@@ -140,7 +140,7 @@ class ManageSecurityGroup:
         except NoCredentialsError:
             return False,"No se encontraron credenciales"
 
-    def authorize_rule_egress(self,ip_permissions:list)-> tuple[bool,str]:
+    def authorize_rule_egress(self,ip_permissions:dict)-> tuple[bool,dict | str]:
     
         try:
             self.ec2.authorize_security_group_egress(
@@ -156,7 +156,7 @@ class ManageSecurityGroup:
         except NoCredentialsError:
             return False,"No se encontraron credenciales"
             
-    def remove_rule_egress(self,ip_permissions:list)-> tuple[bool,dict | str]:
+    def remove_rule_egress(self,ip_permissions:dict)-> tuple[bool,dict | str]:
 
         try:
             for valor in ip_permissions["IpRanges"]:
