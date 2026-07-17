@@ -18,33 +18,38 @@ def choice(dict_data:dict)-> str:
     
 def request_ip_permissions(public_ip:str)-> dict:
 
-
     print("Por favor asegurarse de que los datos ingresados sean correctos.\n")
-    while True:
-        try:
-            protocol = input("Protocolo (tcp/udp/icmp/-1 para todo) : ").strip()
-            from_port = int(input("Puerto inicio: ")) if protocol != "-1" else -1
-            to_port = int(input("Puerto fin: "))  if protocol != "-1" else -1
-            cidr_ip = input("CIDR IP (ej: 0.0.0.0/0 o ingresa \"1\" para colocar automaticamente su ip publica) : ").strip()
-            description = input("Descripción de la regla (opcional) : ").strip()
-            break
-                
-        except ValueError:
-            print("Solo ingresar valores numericos en Puerto inicio y puerto fin.")
+    protocol = input("Protocolo (tcp/udp/icmp/-1 para todo) : ").strip()
 
+    while True:
+  
+        from_port = ask_int(prompt="Puerto inicio : ",value_min=1,value_max=65535,msg_max="El rango valido para puertos es : 1 -") if protocol != "-1" else -1
+        to_port = ask_int(prompt="Puerto fin : ",value_min=1,value_max=65535,msg_max="El rango valido para puertos es : 1 -") if protocol != "-1" else -1
+
+        if protocol == "-1":
+            break
+        elif to_port >= from_port:
+            break
+
+        print(Fore.YELLOW + "El puerto de inicio no puede mayor al puerto fin." + Style.RESET_ALL)
+        continue     
+
+    cidr_ip = input("CIDR IP (ej: 0.0.0.0/0 o ingresa \"1\" para colocar automaticamente su ip publica) : ").strip()
+    description = input("Descripción de la regla (opcional) : ").strip()
+    cidr_ip_finaly = public_ip if cidr_ip == "1" else cidr_ip
     return {
             "IpProtocol": protocol,
             "FromPort": from_port,
             "ToPort": to_port,
             "IpRanges": [
                 {
-                    "CidrIp": cidr_ip if cidr_ip == "0.0.0.0/0" else public_ip,
+                    "CidrIp": cidr_ip_finaly,
                     "Description": description
                 }
             ]
         }
 
-def ask_int(prompt:str, value_min : int = 1, value_max : int = 100):
+def ask_int(prompt:str,value_min:int = 1,value_max:int = 100,msg_max:str="")-> int:
 
     while True:
 
@@ -52,10 +57,11 @@ def ask_int(prompt:str, value_min : int = 1, value_max : int = 100):
             value = int(input(prompt))
 
             if value < value_min:
-                print(Fore.YELLOW + f"El valor debe ser mayor a : {value_min}" + Style.RESET_ALL)
+                print(Fore.YELLOW + f"El valor debe ser mayor o igual a : {value_min}" + Style.RESET_ALL)
                 continue
+
             elif value > value_max:
-                print(Fore.YELLOW + f"El Maximo de instancias permitido es : {value_max}" + Style.RESET_ALL)
+                print(Fore.YELLOW + f"{msg_max} {value_max}" + Style.RESET_ALL)
                 continue
             return value
         except ValueError:
@@ -75,10 +81,10 @@ MinCount = 2  → "pero necesito al menos 2\n""" + Style.RESET_ALL)
      
     while True:
 
-        min_count = ask_int(prompt="Ingrese el minimo de instancias que desea desplegar : ")
-        max_count = ask_int(prompt="Ingrese el maximo de instancias que desea desplegar : ")
+        min_count = ask_int(prompt="Ingrese el minimo de instancias que desea desplegar : ",msg_max="El maximo de instancias que se puede desplegar es :")
+        max_count = ask_int(prompt="Ingrese el maximo de instancias que desea desplegar : ",msg_max="El maximo de instancias que se puede desplegar es :")
 
-        if max_count > min_count:
+        if max_count >= min_count:
             break
         print(Fore.YELLOW + "\nError: El máximo debe ser mayor o igual al mínimo. Intente de nuevo.\n" + Style.RESET_ALL)
         
