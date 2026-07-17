@@ -28,7 +28,7 @@ class ManageSecurityGroup:
         except NoCredentialsError:
             return False,"No se encontraron credenciales"
 
-    def formata_data_sg_rules(self,response:dict)-> dict[str, dict | list]:
+    def formata_data_sg_rules(self,response:dict)-> DictFormatSGRules:
 
         filas_tabulate_ingress = []
         filas_tabulate_egress = []
@@ -87,7 +87,7 @@ class ManageSecurityGroup:
             "dict_rules_egress": dict_rules_egress
             }
 
-    def format_data_sg_general(self,response:dict)-> DictFormatSGRules:
+    def format_data_sg_general(self,response:dict)-> tuple[list,dict]:
 
         dict_sg_id = {}
         filas_tabulate = []

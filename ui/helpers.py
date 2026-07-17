@@ -103,7 +103,7 @@ MinCount = 2  → "pero necesito al menos 2\n""" + Style.RESET_ALL)
         
     return min_count,max_count,name_ec2
            
-def formate_region_name()-> tuple[list|dict]:
+def formate_region_name()-> tuple[list,dict]:
 
     filas_tabulate = []
     dict_region_id = {}
