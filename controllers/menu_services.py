@@ -9,9 +9,11 @@ def ec2_menu(manager):
 
         options_ec2 =  data_ec2.main_ec2
 
-        print(Style.BRIGHT + "\n\n  Manage EC2\n" + Style.RESET_ALL)
+        print(Style.BRIGHT + "\n\n\t\t\t\t    Manage EC2" + Style.RESET_ALL)
+        print("\t\t\t┌─────────────────────────────────┐")
         for clave,valor in options_ec2.items():
-            print(f"|{clave}-{valor}")
+            print(f"\t\t\t| [{Style.BRIGHT + clave + Style.RESET_ALL}] -> {valor:<25}|")
+        print("\t\t\t└─────────────────────────────────┘")
 
         choice_ec2 = helpers.choice_main(options_ec2)
         match choice_ec2:
@@ -31,11 +33,14 @@ def sg_menu(manager):
     while True:
 
         option_sg = data_ec2.main_sg
-        print(Style.BRIGHT + "\n\n  Manage Security Groups" + Style.RESET_ALL)
-        print( f"Estas operando sobre grupo de seguridad : {Style.BRIGHT + manager.security_groups.sg_id + Style.RESET_ALL} \n")
-
+        print(Style.BRIGHT + "\n\n\t\t\t\tManage Security Groups" + Style.RESET_ALL)
+        print("\t\t\t┌────────────────────────────────────┐")
+        print(f"\t\t\t|   {Style.BRIGHT} SG ID: {manager.security_groups.sg_id} {Style.RESET_ALL}    |")
+        print("\t\t\t|____________________________________|")
         for clave,valor in option_sg.items():
-            print(f"|{clave}-{valor}")
+            print(f"\t\t\t| [{Style.BRIGHT + clave + Style.RESET_ALL}] -> {valor:<28}|")
+        print("\t\t\t└────────────────────────────────────┘")
+        
 
         choice_operation = helpers.choice_main(option_sg)
         match choice_operation:
@@ -64,10 +69,12 @@ def kp_menu(manager):
     while True:
 
         options_key_pair = data_ec2.main_key_pair            
-        print(Style.BRIGHT + "\n\n  Manage Key Pairs\n" + Style.RESET_ALL)
+        print(Style.BRIGHT + "\t\t\t\t  Manage Key Pairs" + Style.RESET_ALL)
 
+        print("\t\t\t ┌─────────────────────────────────┐")
         for clave,valor in options_key_pair.items():
-            print(f"|{clave}-{valor}")
+            print(f"\t\t\t | [{Style.BRIGHT + clave + Style.RESET_ALL}] -> {valor:<25}|")
+        print("\t\t\t └─────────────────────────────────┘")
 
         choice_key_pair = helpers.choice_main(options_key_pair)
 
@@ -87,28 +94,62 @@ def root_menu(matriz_dashboard,manager):
 
     header = data_ec2.header_dashboard["header"]
     title = data_ec2.header_dashboard["title"]
+    summary_resources = get_summary_all(manager)
+
     while True:
 
-        print(Style.BRIGHT + f"\tBienvenido a Manage AWS \n" + Style.RESET_ALL)
+        print(Style.BRIGHT + f"\t\t\t\tBienvenido a Manage AWS \n" + Style.RESET_ALL)
         helpers.display_table(matriz_dashboard,header,title)
+        print_dashboard_resources(summary_resources)
         options_root = data_ec2.main_root
 
+        print("\t\t\t┌────────────────────────────────────┐")
         for clave,valor in options_root.items():
-            print(f"|{clave}-{valor}")
+            print(f"\t\t\t| [{Style.BRIGHT + clave + Style.RESET_ALL}] -> {valor:<28}|")
+        print("\t\t\t└────────────────────────────────────┘")
 
         choice_aws = helpers.choice_main(options_root)
+
         match choice_aws:
 
             case "1":
                 ec2_menu(manager)
             case "2":
                  if not manager.security_groups.sg_id:
-                    manager.change_sg_id()
+                    if manager.change_sg_id() == "cancel":
+                        continue
                  sg_menu(manager)
             case "3":
                 kp_menu(manager)
             case "4":
-                break
+                summary_resources = get_summary_all(manager)
+                print(Fore.CYAN + "[ℹ] Dashboard refrescado correctamente\n\n\n" + Style.RESET_ALL)
             case "5":
+                break
+            case "6":
                 print(Fore.GREEN + ":D Hasta pronto..." + Style.RESET_ALL)
                 return True
+
+def print_dashboard_resources(summary_resources):
+
+    instance_on = summary_resources["instance_on"]
+    instance_off = summary_resources["instance_off"]
+    sg_total = summary_resources["sg_total"]
+    key_pairs_total = summary_resources["key_pairs_total"]
+
+    print("\t\t┌──────────────────────────────────────────────────────┐")
+    print(f"\t\t| {Style.BRIGHT}EC2{Style.RESET_ALL} : {instance_on} Activas / {instance_off} Inactivas | {Style.BRIGHT}SG{Style.RESET_ALL}: {sg_total} | {Style.BRIGHT}Key Pairs{Style.RESET_ALL}: {key_pairs_total:<2}|")
+    print("\t\t└──────────────────────────────────────────────────────┘")
+
+def get_summary_all(manager):
+
+    instance_on,instance_off = manager.ec2.sumary_ec2()
+    sg_total = manager.security_groups.summary_sg()
+    key_pairs_total = manager.key_pair.summary_key_pairs()
+
+    return {
+        "instance_on": instance_on,
+        "instance_off": instance_off,
+        "sg_total": sg_total,
+        "key_pairs_total": key_pairs_total
+    }
