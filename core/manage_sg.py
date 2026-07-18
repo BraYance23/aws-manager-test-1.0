@@ -174,7 +174,17 @@ class ManageSecurityGroup:
         
         except NoCredentialsError:
             return False,"No se encontraron credenciales"
-        
+    
+    def summary_sg(self):
+
+        sg_total = 0
+        flag_response,response = self.get_rules_sg()
+        if not flag_response:
+            return sg_total
+
+        list_sg = response["SecurityGroups"]
+        return len(list_sg)
+            
 
 if __name__ == "__main__":
     pass
