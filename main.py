@@ -161,11 +161,16 @@ class ManagerAWS:
         while True:
             ip_permissions = helpers.request_ip_permissions(ip_public)
             confirmation = helpers.confirmation_config(data=ip_permissions,title="Regla de entrada a crear")
-            if confirmation:
-                break
+            
+            match confirmation:
+                case "confirm":
+                    break
+                case "cancel":
+                    return
+                case "retry":
+                    continue
 
         flag,code_or_rule = self.security_groups.authorize_rule_ingress(ip_permissions)
-
         if not flag:
                   helpers.handle_aws_error(code_or_rule)
                   logger.error(f"Fallo  autorize_ingress | SG ID : {self.security_groups.sg_id} | CODE : {code_or_rule}")
@@ -184,8 +189,14 @@ class ManagerAWS:
         while True:
             ip_permissions = helpers.request_ip_permissions(ip_public)
             confirmation = helpers.confirmation_config(data=ip_permissions,title="Regla de salida a crear")
-            if confirmation:
-                break
+            
+            match confirmation:
+                case "confirm":
+                    break
+                case "cancel":
+                    return
+                case "retry":
+                    continue
 
         flag,code_or_rule = self.security_groups.authorize_rule_egress(ip_permissions)
 

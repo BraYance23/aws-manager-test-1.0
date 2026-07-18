@@ -1,4 +1,5 @@
 import json
+from typing import Literal
 import requests
 from tabulate import tabulate
 from colorama import init,Style,Fore
@@ -50,17 +51,23 @@ def request_ip_permissions(public_ip:str)-> dict:
             ]
         }
 
-def confirmation_config(data:dict,title:str="")-> bool:
+def confirmation_config(data:dict,title:str="")-> Literal["confirm","cancel","retry"]:
 
     print(Style.BRIGHT + f"\n\t{title}" + Style.RESET_ALL)
     print(json.dumps(data,indent=2,default=str))
     while True:
-        confirmation_user = input(Style.BRIGHT + "\nLos datos ingresados son correctos? S/N: " + Style.RESET_ALL ).strip().upper()
+        confirmation_user = input(Style.BRIGHT + "\n¿Los datos ingresados son correctos? [S/N] | [0] Volver al menú anterior: " + Style.RESET_ALL ).strip().upper()
 
-        if "S" != confirmation_user != "N":
+        if confirmation_user not in ["S","N","0"]:
                 print(Fore.YELLOW + "Valor ingresado no valido, por favor confirmar operacion." + Style.RESET_ALL)
                 continue
-        return confirmation_user == "S"
+
+        if confirmation_user == "S":
+            return "confirm"
+        elif confirmation_user == "0":
+            return "cancel"
+        else:
+            return "retry"
 
 def ask_int(prompt:str,value_min:int = 1,value_max:int = 100,msg_max:str="")-> int:
 
