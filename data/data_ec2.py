@@ -143,29 +143,29 @@ headers_types_ec2 =  {"header": [Style.BRIGHT + "INDICE",
                                  "$/hora",
                                  "$/mes",
                                   "Free Tier" + Style.RESET_ALL],
-                    "title": "Tipos de instancias disponibles y costes"}
+                    "title": "\tTipos de instancias disponibles y costes"}
 
 header_region_name = {"header" :[Style.BRIGHT + "INDICE",
                                      "Location Name",
                                      "Region ID" + Style.RESET_ALL],
-                     "title": "Regiones disponibles para administrar"}
+                     "title": "   Regiones disponibles para administrar"}
 
 header_dashboard = {"header": [Style.BRIGHT+"Account ID",
                                "ARN","Location Name",
                                "Region Name" + Style.RESET_ALL],
 
-                    "title": "Datos asociados a su cuenta de AWS"}
+                    "title": "\t\t\tDatos asociados a su cuenta de AWS"}
 
 header_key_pair = {"header" : [Style.BRIGHT + "ID list",
                       "Key name",
                       "Key Pair ID",
                       "Create Time" + Style.RESET_ALL],
-                  "title": "Llaves SSH existentes"}
+                  "title": "\t\tLlaves SSH existentes"}
 
 header_sg = {"header":  [Style.BRIGHT + "INDICE",
                         "Group ID",
                         "Descripcion" + Style.RESET_ALL],
-            "title":    "Grupos de seguridad existentes"}
+            "title":    "\t\t\tGrupos de seguridad existentes"}
 
 header_rules_sg:DictHeaderRulesSG = {"header" : [Style.BRIGHT + "INDICE",
                                 "Protocolo",
@@ -173,8 +173,8 @@ header_rules_sg:DictHeaderRulesSG = {"header" : [Style.BRIGHT + "INDICE",
                                 "Puerto fin",
                                 "Cdir IP",
                                 "Descripción" + Style.RESET_ALL],
-                    "title_ingress": "Reglas de entrada existentes: ",
-                    "title_egress": "Reglas de salida existentes: "}
+                    "title_ingress": "\t\t\t\tReglas de entrada existentes ",
+                    "title_egress": "\t\t\t\tReglas de salida existentes "}
 
 header_ec2 = {"header" : [Style.BRIGHT +"INDICE",
                           "Nombre EC2",
@@ -183,7 +183,7 @@ header_ec2 = {"header" : [Style.BRIGHT +"INDICE",
                           "ID instancia",
                           "IP publica",
                           "Fecha de lanzamiento" +Style.RESET_ALL],
-            "title": "listado y descripcion de instancias :"}
+            "title": "\t\t\t\t\t\tlistado y descripcion de instancias"}
 
 header_os_general = {"header" :[Style.BRIGHT + "INDICE",
                                 "DISTRO",
@@ -202,7 +202,7 @@ header_selected_ami = {"header": [Style.BRIGHT + "INDICE",
                                       "Architecture",
                                       "Free tier",
                                       "Date creation" + Style.RESET_ALL],
-                      "title": "AMIS disponible :"}
+                      "title": "\t\t\tAMIS disponible :"}
 
 
 """
@@ -212,8 +212,9 @@ Control de flujo de servicios y orquestador
 main_root = {"1": "Administrar EC2",
             "2": "Administar Security Groups",
             "3": "Administar Key Pairs",
-            "4": "Cambiar de region",
-            "5": "Salir"}
+            "4": "Actualizar Dashboard",
+            "5": "Cambiar de region",
+            "6": "Salir"}
 
 main_ec2 = {"1": "Listar instancias",
             "2": "Desplegar instancia",
