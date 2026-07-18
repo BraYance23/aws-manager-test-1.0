@@ -257,7 +257,7 @@ def choice_main(dict_options:dict)-> str:
 
 def display_table(data:list,header:list,title:str):
 
-    print(title)
+    print(Style.BRIGHT + title + Style.RESET_ALL)
     print(tabulate(data,headers=header,tablefmt="fancy_grid"))
 
 
