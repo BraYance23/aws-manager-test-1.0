@@ -114,7 +114,7 @@ TYPES_INSTANCES = [
 
 pameter_operation_ec2 = {
     "3": ("📟-Iniciando instancia","running","✅-Instancia iniciada correctamente."),
-    "4": ("🔁-Reiniciando instancia","running","✅-Instancia reiniciada correctamente."),
+    "4": ("🔁-Reiniciando instancia","statust_ok","✅-Instancia reiniciada correctamente."),
     "5": ("🛑-Deteniendo instancia","stopped","✅-Instancia detenenida correctamente."),
     "6": ("🗑️-Eliminando instancia","terminated","✅-Instancia terminada correctamente.")
 }    
@@ -163,7 +163,7 @@ header_key_pair = {"header" : [Style.BRIGHT + "ID list",
                   "title": "\t\tLlaves SSH existentes"}
 
 header_sg = {"header":  [Style.BRIGHT + "INDICE",
-                        "Group ID",
+                        "SG ID",
                         "Descripcion" + Style.RESET_ALL],
             "title":    "\t\t\tGrupos de seguridad existentes"}
 
@@ -171,7 +171,7 @@ header_rules_sg:DictHeaderRulesSG = {"header" : [Style.BRIGHT + "INDICE",
                                 "Protocolo",
                                 "Puerto inicio",
                                 "Puerto fin",
-                                "Cdir IP",
+                                "CDIR IP",
                                 "Descripción" + Style.RESET_ALL],
                     "title_ingress": "\t\t\t\tReglas de entrada existentes ",
                     "title_egress": "\t\t\t\tReglas de salida existentes "}
@@ -183,12 +183,12 @@ header_ec2 = {"header" : [Style.BRIGHT +"INDICE",
                           "ID instancia",
                           "IP publica",
                           "Fecha de lanzamiento" +Style.RESET_ALL],
-            "title": "\t\t\t\t\t\tlistado y descripcion de instancias"}
+            "title": "\t\t\t\t\t\tlistado y descripción de instancias"}
 
 header_os_general = {"header" :[Style.BRIGHT + "INDICE",
                                 "DISTRO",
                                 "ARQUITECTURA" + Style.RESET_ALL],
-                    "title": "Selecciones el tipo de sistema operativo que desea desplegar :"}
+                    "title": "Seleccione el tipo de sistema operativo que desea desplegar :"}
 
 header_os_version = {"header":[Style.BRIGHT + "INDICE",
                                     "Distros",
@@ -228,8 +228,8 @@ main_sg = {"1": "Listar reglas de entrada",
            "2": "Listar reglas de salida",
            "3": "Agregar regla de entrada",
            "4": "Eliminar regla de entrada",
-           "5": "Agregar regla de salidad",
-           "6": "Eliminar reglada de entrada",
+           "5": "Agregar regla de salida",
+           "6": "Eliminar reglada de salida",
            "7": "Cambiar grupo de seguridad",
            "8": "Volver al menu principal"
            }

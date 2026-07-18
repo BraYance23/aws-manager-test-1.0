@@ -29,26 +29,6 @@ class ManagerAWS:
 
 #Instancias:
 
-    def run_ec2(self):
-        
-        while True:
-            config_instace = self.request_data_run_instance()
-            confirmation = helpers.confirmation_config(config_instace,title="Configuracion de instancia a desplegar")
-            if confirmation:
-                break
-
-        flag,code = self.ec2.run_ec2(config_instace)
-
-        if not flag:
-            helpers.handle_aws_error(code)
-            logger.error(f"Error al lanzar instancia : {code}")
-            return
-
-        logger.info(f"EC2 desplegado correctamente, ID : {code}")
-        print(Fore.CYAN + Style.BRIGHT + "-Desplegando instancia...")
-        self.ec2.waiter_for_state(code,"running")
-        print("instancia desplegada correctamente.🚀" + Style.RESET_ALL)
-        
     def operation_ec2(self,selection):
 
         flag_describe_ec2,response = self.ec2.describe_ec2()
@@ -62,7 +42,10 @@ class ManagerAWS:
             return
         
         self.show_instances()
-        instance_id = helpers.choice(dict_id_ec2)
+        instance_id = helpers.choice(dict_id_ec2,context="de la instancia deseada")
+
+        if instance_id == "cancel":
+            return
 
         mensaje_init,waiter,mensaje_fin = data_ec2.pameter_operation_ec2[selection]
         
@@ -83,8 +66,11 @@ class ManagerAWS:
             return
         
         print(Style.BRIGHT +  mensaje_init + Style.RESET_ALL)
-        self.ec2.waiter_for_state(instance_id,waiter)
-        print(Fore.GREEN + mensaje_fin + Style.RESET_ALL)
+        correct_operation = self.ec2.waiter_for_state(instance_id,waiter)
+        if correct_operation:
+            print(Fore.GREEN + mensaje_fin + Style.RESET_ALL)
+            return
+        print(Fore.RED + f"No se pudo verificar el estado de la instancia, por favor validar en |1-Listar instancias" + Style.RESET_ALL)
                  
     def show_instances(self):
 
@@ -122,7 +108,7 @@ class ManagerAWS:
 
         helpers.display_table(filas_tabulate,header,title)
         
-        return helpers.choice(dict_sg_id)
+        return helpers.choice(dict_data=dict_sg_id,context="el grupo de seguridad que desea administrar")
             
     def show_rules_sg(self,direction:str):
 
@@ -182,35 +168,6 @@ class ManagerAWS:
         input("Presione enter para listar las reglas actualizadas.")
         self.show_rules_sg(direction)
 
-    def autorize_sg_egress(self,direction):
-
-        ip_public = helpers.get_ip_public()
-
-        while True:
-            ip_permissions = helpers.request_ip_permissions(ip_public)
-            confirmation = helpers.confirmation_config(data=ip_permissions,title="Regla de salida a crear")
-            
-            match confirmation:
-                case "confirm":
-                    break
-                case "cancel":
-                    return
-                case "retry":
-                    continue
-
-        flag,code_or_rule = self.security_groups.authorize_rule_egress(ip_permissions)
-
-        if not flag:
-                  helpers.handle_aws_error(code_or_rule)
-                  logger.error(f"Fallo  autorize_egress | SG ID : {self.security_groups.sg_id} | CODE : {code_or_rule}")
-                  return
-
-        format_ip_permissions = json.dumps(ip_permissions,indent=2,default=str)   
-        print(Fore.GREEN + f"Puerto: {ip_permissions['FromPort']} abierto con exito en : {self.security_groups.sg_id}" + Style.RESET_ALL)
-        logger.info(f"Autorize_egress en SG ID: {self.security_groups.sg_id}\nRegla : {format_ip_permissions}")
-        input("Presione enter para listar las reglas actualizadas.")
-        self.show_rules_sg(direction)
-
     def revoke_sg_ingress(self,direction):
 
         flag_get_rules,response_or_code = self.security_groups.get_rules_sg(self.security_groups.sg_id)
@@ -227,7 +184,11 @@ class ManagerAWS:
             print("No hay reglas existentes.")
             return
 
-        selected_rule = helpers.choice(dict_rules)
+        selected_rule = helpers.choice(dict_data=dict_rules,context="de la regla de seguridad deseada")
+
+        if selected_rule == "cancel":
+            return
+            
         confirmation = helpers.confirmation()
 
         if not confirmation:
@@ -260,7 +221,9 @@ class ManagerAWS:
             print("No hay reglas existentes.")
             return
 
-        selected_rule = helpers.choice(dict_rules)
+        selected_rule = helpers.choice(dict_data=dict_rules,context="de la regla de seguridad deseada")
+        if selected_rule == "cancel":
+            return
         confirmation = helpers.confirmation()
 
         if not confirmation:
@@ -279,7 +242,13 @@ class ManagerAWS:
 
     def change_sg_id(self):
 
-        self.security_groups.sg_id = self.inject_sg_id()
+        selected_sg_id =  self.inject_sg_id()
+
+        if selected_sg_id == "cancel":
+            return "cancel"
+        
+        self.security_groups.sg_id = selected_sg_id
+        return True
 
 #Key Pairs
 
@@ -300,7 +269,7 @@ class ManagerAWS:
         title = data_ec2.header_key_pair["title"]
         helpers.display_table(filas_tabulate,header,title)
 
-    def select_key_pair(self):
+    def select_key_pair(self)-> bool|None|str:
 
         flag,response = self.key_pair.request_key_pairs()
 
@@ -312,14 +281,13 @@ class ManagerAWS:
 
         if not filas_tabulate:
             print(f"No hay llaves SSH existentes en esta region : {self.region_name}")
-            return False
+            return None
 
         headers = data_ec2.header_key_pair["header"]
         title = data_ec2.header_key_pair["title"]
 
         helpers.display_table(filas_tabulate,headers,title)
-        selected_key = helpers.choice(dict_key)
-        return selected_key
+        return helpers.choice(dict_data=dict_key,context="de la llave de SSH deseada")
     
     def generate_key_pairs(self):
 
@@ -346,11 +314,12 @@ class ManagerAWS:
   
         key_selected  = self.select_key_pair()
 
-        if not key_selected:
-                return
-        
-        confirmation = helpers.confirmation()
+        match key_selected:
 
+            case "cancel" | False | None:
+                return
+
+        confirmation = helpers.confirmation()
         if not confirmation:
                 print("Operacion cancelada")
                 return

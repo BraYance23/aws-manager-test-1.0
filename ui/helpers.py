@@ -5,17 +5,19 @@ from tabulate import tabulate
 from colorama import init,Style,Fore
 from data import data_ec2 
 
-def choice(dict_data:dict)-> str:
+def choice(dict_data:dict,context:str)-> str:
 
     while True:
-        choice = input(Style.BRIGHT + "\nIngrese el numero INDICE de la opcion que desee : " + Style.RESET_ALL).strip()
+        choice = input(Style.BRIGHT + f"\nIngrese el índice {context} ('0' para cancelar): " + Style.RESET_ALL).strip()
 
         if not choice:
             print(Fore.YELLOW + f"Valor ingresado vacio,por favor ingresar una opción." + Style.RESET_ALL)
             continue
         elif choice in dict_data:
             return dict_data[choice]
-        
+        elif choice == "0":
+            return "cancel"
+
         print(Fore.YELLOW + "Valor ingresado no esta en el rango valido." + Style.RESET_ALL)
     
 def request_ip_permissions(public_ip:str)-> dict:
@@ -131,7 +133,7 @@ def select_region_name():
     title = data_ec2.header_region_name["title"]
 
     display_table(filas_tabulate,header,title)
-    region_name = choice(dict_region_name)
+    region_name = choice(dict_data=dict_region_name,context="de la region que desea administar")
     location_name = data_ec2.AWS_REGIONS.get(region_name)
     return region_name,location_name
 

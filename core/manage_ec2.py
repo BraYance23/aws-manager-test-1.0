@@ -1,6 +1,7 @@
 import logging
+import  time
 import boto3
-from botocore.exceptions import ClientError,NoCredentialsError
+from botocore.exceptions import ClientError,NoCredentialsError,WaiterError
 
 
 logger = logging.getLogger(__name__)
@@ -161,13 +162,20 @@ class ManageEc2:
                          ])
         return dict_id_ec2,filas_tabulate
       
-    def waiter_for_state(self,instance_id:str,target_state:str)-> bool:
-     
-        waiter = self.ec2.get_waiter(f"instance_{target_state}")
-        waiter.wait(InstanceIds=[instance_id])
-        return True
+    def waiter_for_state(self, instance_id: str, target_state: str) -> bool:
+
+        try:
+            if target_state == "status_ok":
+                time.sleep(12)
+
+            waiter = self.ec2.get_waiter(f"instance_{target_state}")
+            waiter.wait(InstanceIds=[instance_id])
+            return True
+        except WaiterError as e:
+            logger.error(f"Waiter falló para {instance_id} -> {target_state}: {e}")
+            return False
     
-    def sumary_ec2(self):
+    def summary_ec2(self):
 
         instances_on = 0
         instances_off = 0

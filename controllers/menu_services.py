@@ -123,7 +123,7 @@ def root_menu(matriz_dashboard,manager):
                 kp_menu(manager)
             case "4":
                 summary_resources = get_summary_all(manager)
-                print(Fore.CYAN + "[ℹ] Dashboard refrescado correctamente\n\n\n" + Style.RESET_ALL)
+                print(Fore.CYAN + "[ℹ] Dashboard actualizado correctamente\n\n\n" + Style.RESET_ALL)
             case "5":
                 break
             case "6":
@@ -143,7 +143,7 @@ def print_dashboard_resources(summary_resources):
 
 def get_summary_all(manager):
 
-    instance_on,instance_off = manager.ec2.sumary_ec2()
+    instance_on,instance_off = manager.ec2.summary_ec2()
     sg_total = manager.security_groups.summary_sg()
     key_pairs_total = manager.key_pair.summary_key_pairs()
 
