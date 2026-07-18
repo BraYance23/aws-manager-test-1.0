@@ -96,6 +96,15 @@ class ManageKeyPairs:
         except NoCredentialsError:
             return False,"No se encontraron credenciales"
 
+    def summary_key_pairs(self):
 
+        key_pairs_total = 0
+        flag,response = self.request_key_pairs()
+
+        if not flag:
+            return key_pairs_total
+
+        list_key_pairs = response["KeyPairs"]
+        return len(list_key_pairs)
 if __name__ == "__main__":
     pass
