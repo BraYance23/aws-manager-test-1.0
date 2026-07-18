@@ -166,6 +166,26 @@ class ManageEc2:
         waiter = self.ec2.get_waiter(f"instance_{target_state}")
         waiter.wait(InstanceIds=[instance_id])
         return True
+    
+    def sumary_ec2(self):
+
+        instances_on = 0
+        instances_off = 0
+        flag_response,response = self.describe_ec2()
+
+        if not flag_response:
+            return instances_on,instances_off
+
+        for reservation in response["Reservations"]:
+            for instance in reservation["Instances"]:
+
+                state = instance["State"].get("Name")
+                if state == "running":
+                    instances_on += 1
+                elif state in ["stopped","shutting-down"]:
+                    instances_off += 1
+
+        return instances_on,instances_off
                
 if __name__ == "__main__":
     pass
