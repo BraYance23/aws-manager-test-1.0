@@ -10,10 +10,10 @@ def ec2_menu(manager):
         options_ec2 =  data_ec2.main_ec2
 
         print(Style.BRIGHT + "\n\n\t\t\t\t    Manage EC2" + Style.RESET_ALL)
-        print("\t\t\t┌─────────────────────────────────┐")
+        print("\t\t\t╒═════════════════════════════════╕")
         for clave,valor in options_ec2.items():
-            print(f"\t\t\t| [{Style.BRIGHT + clave + Style.RESET_ALL}] -> {valor:<25}|")
-        print("\t\t\t└─────────────────────────────────┘")
+            print(f"\t\t\t│ [{Style.BRIGHT + clave + Style.RESET_ALL}] -> {valor:<25}│")
+        print("\t\t\t╘═════════════════════════════════╛")
 
         choice_ec2 = helpers.choice_main(options_ec2)
         match choice_ec2:
@@ -34,12 +34,12 @@ def sg_menu(manager):
 
         option_sg = data_ec2.main_sg
         print(Style.BRIGHT + "\n\n\t\t\t\tManage Security Groups" + Style.RESET_ALL)
-        print("\t\t\t┌────────────────────────────────────┐")
-        print(f"\t\t\t|   {Style.BRIGHT} SG ID: {manager.security_groups.sg_id} {Style.RESET_ALL}    |")
-        print("\t\t\t|____________________________________|")
+        print("\t\t\t╒════════════════════════════════════╕")
+        print(f"\t\t\t│   {Style.BRIGHT} SG ID: {manager.security_groups.sg_id} {Style.RESET_ALL}    │")
+        print("\t\t\t╞════════════════════════════════════╡")
         for clave,valor in option_sg.items():
-            print(f"\t\t\t| [{Style.BRIGHT + clave + Style.RESET_ALL}] -> {valor:<28}|")
-        print("\t\t\t└────────────────────────────────────┘")
+            print(f"\t\t\t│ [{Style.BRIGHT + clave + Style.RESET_ALL}] -> {valor:<28}│")
+        print("\t\t\t╘════════════════════════════════════╛")
         
 
         choice_operation = helpers.choice_main(option_sg)
@@ -71,13 +71,12 @@ def kp_menu(manager):
         options_key_pair = data_ec2.main_key_pair            
         print(Style.BRIGHT + "\t\t\t\t  Manage Key Pairs" + Style.RESET_ALL)
 
-        print("\t\t\t ┌─────────────────────────────────┐")
+        print("\t\t\t ╒═════════════════════════════════╕")
         for clave,valor in options_key_pair.items():
-            print(f"\t\t\t | [{Style.BRIGHT + clave + Style.RESET_ALL}] -> {valor:<25}|")
-        print("\t\t\t └─────────────────────────────────┘")
+            print(f"\t\t\t │ [{Style.BRIGHT + clave + Style.RESET_ALL}] -> {valor:<25}│")
+        print("\t\t\t ╘═════════════════════════════════╛")
 
         choice_key_pair = helpers.choice_main(options_key_pair)
-
         match choice_key_pair:
 
             case "1":
@@ -95,6 +94,7 @@ def root_menu(matriz_dashboard,manager):
     header = data_ec2.header_dashboard["header"]
     title = data_ec2.header_dashboard["title"]
     summary_resources = get_summary_all(manager)
+    Dashboard_update = False
 
     while True:
 
@@ -103,13 +103,15 @@ def root_menu(matriz_dashboard,manager):
         print_dashboard_resources(summary_resources)
         options_root = data_ec2.main_root
 
-        print("\t\t\t┌────────────────────────────────────┐")
+        if Dashboard_update:
+            print(Fore.CYAN + "\t\t\t[i] Dashboard actualizado correctamente" + Style.RESET_ALL)
+            Dashboard_update = False   
+        print("\t\t\t╒════════════════════════════════════╕")
         for clave,valor in options_root.items():
-            print(f"\t\t\t| [{Style.BRIGHT + clave + Style.RESET_ALL}] -> {valor:<28}|")
-        print("\t\t\t└────────────────────────────────────┘")
+            print(f"\t\t\t│ [{Style.BRIGHT + clave + Style.RESET_ALL}] -> {valor:<28}│")
+        print("\t\t\t╘════════════════════════════════════╛")
 
         choice_aws = helpers.choice_main(options_root)
-
         match choice_aws:
 
             case "1":
@@ -123,23 +125,27 @@ def root_menu(matriz_dashboard,manager):
                 kp_menu(manager)
             case "4":
                 summary_resources = get_summary_all(manager)
-                print(Fore.CYAN + "[ℹ] Dashboard actualizado correctamente\n\n\n" + Style.RESET_ALL)
+                Dashboard_update = True
+                
             case "5":
                 break
             case "6":
                 print(Fore.GREEN + ":D Hasta pronto..." + Style.RESET_ALL)
-                return True
 
 def print_dashboard_resources(summary_resources):
 
-    instance_on = summary_resources["instance_on"]
-    instance_off = summary_resources["instance_off"]
-    sg_total = summary_resources["sg_total"]
-    key_pairs_total = summary_resources["key_pairs_total"]
+    instance_on = f"{summary_resources["instance_on"]:>3}"
+    instance_off = f"{summary_resources["instance_off"]:>3}"
+    sg_total = f"{summary_resources["sg_total"]:>3}"
+    key_pairs_total = f"{summary_resources["key_pairs_total"]:>3}"
 
-    print("\t\t┌──────────────────────────────────────────────────────┐")
-    print(f"\t\t| {Style.BRIGHT}EC2{Style.RESET_ALL} : {instance_on} Activas / {instance_off} Inactivas | {Style.BRIGHT}SG{Style.RESET_ALL}: {sg_total} | {Style.BRIGHT}Key Pairs{Style.RESET_ALL}: {key_pairs_total:<2}|")
-    print("\t\t└──────────────────────────────────────────────────────┘")
+    ec2_dashboard = f"{Style.BRIGHT}EC2{Style.RESET_ALL} : {instance_on} Activas / {instance_off} Inactivas"
+    sg_dashboard = f"{Style.BRIGHT}SG{Style.RESET_ALL}: {sg_total}"
+    key_pairs_dashboard = f"{Style.BRIGHT}Key Pairs{Style.RESET_ALL}: {key_pairs_total}"
+
+    print("\t\t╒══════════════════════════════════════════════════════════════╕")
+    print(f"\t\t│ {ec2_dashboard} | {sg_dashboard} | {key_pairs_dashboard} │")
+    print("\t\t╘══════════════════════════════════════════════════════════════╛")
 
 def get_summary_all(manager):
 
