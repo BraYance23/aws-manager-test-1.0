@@ -1,157 +1,128 @@
-from colorama import init,Fore,Style
-from ui import helpers
+from controllers.ec2_controller import EC2Controller
+from controllers.sg_controller import SGController
+from controllers.kp_controller import KPController
+from controllers.deploy_flow import select_sg_id
+from ui import menus
+from ui.prompt_general import choice_options_menu,center_text
 from data import data_ec2
-import logging
 
-def ec2_menu(manager):
+
+def ec2_menu(manager_root):
+
+    ec2_controller = EC2Controller(manager_root=manager_root)
 
     while True:
 
         options_ec2 =  data_ec2.main_ec2
+        print("\n")
+        menus.print_menu_ec2()
+        choice_ec2 = choice_options_menu(options_ec2)
 
-        print(Style.BRIGHT + "\n\n\t\t\t\t    Manage EC2" + Style.RESET_ALL)
-        print("\t\t\t╒═════════════════════════════════╕")
-        for clave,valor in options_ec2.items():
-            print(f"\t\t\t│ [{Style.BRIGHT + clave + Style.RESET_ALL}] -> {valor:<25}│")
-        print("\t\t\t╘═════════════════════════════════╛")
-
-        choice_ec2 = helpers.choice_main(options_ec2)
-        match choice_ec2:
-            
+        match choice_ec2: 
             case "1":
-                manager.show_instances()
-                input("Presione enter para continuar")
+                ec2_controller.show_instances()
+                input(center_text("Presione enter para continuar"))
             case "2":
-                manager.run_ec2()
+                ec2_controller.run_ec2()
             case "3" | "4" |"5" | "6":
-                manager.operation_ec2(choice_ec2)
+                ec2_controller.operation_ec2(choice_ec2)
             case "7":
                 break
 
-def sg_menu(manager):
+def sg_menu(manager_root):
 
+    sg_controller = SGController(manager_root=manager_root)
     while True:
-
-        option_sg = data_ec2.main_sg
-        print(Style.BRIGHT + "\n\n\t\t\t\tManage Security Groups" + Style.RESET_ALL)
-        print("\t\t\t╒════════════════════════════════════╕")
-        print(f"\t\t\t│   {Style.BRIGHT} SG ID: {manager.security_groups.sg_id} {Style.RESET_ALL}    │")
-        print("\t\t\t╞════════════════════════════════════╡")
-        for clave,valor in option_sg.items():
-            print(f"\t\t\t│ [{Style.BRIGHT + clave + Style.RESET_ALL}] -> {valor:<28}│")
-        print("\t\t\t╘════════════════════════════════════╛")
         
+        menus.print_menu_sg(sg_id=manager_root.sg.sg_id)
+        options_sg = data_ec2.main_sg
+        choice_operation = choice_options_menu(dict_options=options_sg)
 
-        choice_operation = helpers.choice_main(option_sg)
         match choice_operation:
 
             case "1":
-                manager.show_rules_sg(direction="ingress")
-                input("Presione enter para continuar.")
+                sg_controller.show_rules_sg(direction="ingress")
+                input(center_text("Presione enter para continuar"))
             case "2":
-                manager.show_rules_sg(direction="egress")
-                input("Presione enter para continuar.")    
+                sg_controller.show_rules_sg(direction="egress")
+                input(center_text("Presione enter para continuar"))    
             case "3":
-                manager.autorize_sg_ingress(direction = "ingress")
+                sg_controller.autorize_sg_ingress(direction = "ingress")
             case "4":
-                manager.revoke_sg_ingress(direction = "ingress")
+                sg_controller.autorize_sg_egress(direction = "egress")
             case "5":
-                manager.autorize_sg_egress(direction = "egress")
+                sg_controller.revoke_sg_ingress(direction = "ingress")
             case "6":
-                manager.revoke_sg_egress(direction = "egress")
+                sg_controller.revoke_sg_egress(direction = "egress")
             case "7":
-                manager.change_sg_id()
+                sg_controller.change_sg_id()
             case "8":
                 break
 
-def kp_menu(manager):
-    
+def kp_menu(manager_root):
+
+    kp_controller = KPController(manager_root=manager_root)
     while True:
 
-        options_key_pair = data_ec2.main_key_pair            
-        print(Style.BRIGHT + "\t\t\t\t  Manage Key Pairs" + Style.RESET_ALL)
+        options_key_pair = data_ec2.main_key_pair
+        menus.print_menu_kp(manager_root.region_name)
+        choice_key_pair = choice_options_menu(dict_options=options_key_pair)
 
-        print("\t\t\t ╒═════════════════════════════════╕")
-        for clave,valor in options_key_pair.items():
-            print(f"\t\t\t │ [{Style.BRIGHT + clave + Style.RESET_ALL}] -> {valor:<25}│")
-        print("\t\t\t ╘═════════════════════════════════╛")
-
-        choice_key_pair = helpers.choice_main(options_key_pair)
         match choice_key_pair:
 
             case "1":
-                manager.show_key_pairs()
-                input("Presione enter para continuar.")
+                kp_controller.show_key_pairs()
+                input(center_text("Presione entener para continuar"))
             case "2":
-                manager.generate_key_pairs()
+                kp_controller.generate_key_pairs()
             case "3":
-                manager.delete_key_pairs()
+                kp_controller.delete_key_pairs()
             case "4":
                 break
 
-def root_menu(matriz_dashboard,manager):
+def root_menu(account_data,manager_root):
 
-    header = data_ec2.header_dashboard["header"]
-    title = data_ec2.header_dashboard["title"]
-    summary_resources = get_summary_all(manager)
+    summary_resources = get_summary_all(manager_root)
     Dashboard_update = False
-
     while True:
 
-        print(Style.BRIGHT + f"\t\t\t\tBienvenido a Manage AWS \n" + Style.RESET_ALL)
-        helpers.display_table(matriz_dashboard,header,title)
-        print_dashboard_resources(summary_resources)
-        options_root = data_ec2.main_root
-
         if Dashboard_update:
-            print(Fore.CYAN + "\t\t\t[i] Dashboard actualizado correctamente" + Style.RESET_ALL)
-            Dashboard_update = False   
-        print("\t\t\t╒════════════════════════════════════╕")
-        for clave,valor in options_root.items():
-            print(f"\t\t\t│ [{Style.BRIGHT + clave + Style.RESET_ALL}] -> {valor:<28}│")
-        print("\t\t\t╘════════════════════════════════════╛")
+            menus.print_root_menu(account_data=account_data,summary=summary_resources,update_dashboard="\n[magenta italic]Dashboard actualizado correctamente\n[/magenta italic]")
+            Dashboard_update = False  
+        else:
+            menus.print_root_menu(account_data=account_data,summary=summary_resources)
 
-        choice_aws = helpers.choice_main(options_root)
+        options_root = data_ec2.main_root
+        choice_aws = choice_options_menu(dict_options=options_root)
         match choice_aws:
 
             case "1":
-                ec2_menu(manager)
+                ec2_menu(manager_root)
             case "2":
-                 if not manager.security_groups.sg_id:
-                    if manager.change_sg_id() == "cancel":
+                 if not manager_root.sg.sg_id:
+    
+                    if select_sg_id(manager_root=manager_root) == "cancel":
                         continue
-                 sg_menu(manager)
+                 sg_menu(manager_root)
+
             case "3":
-                kp_menu(manager)
+                kp_menu(manager_root)
             case "4":
-                summary_resources = get_summary_all(manager)
+                summary_resources = get_summary_all(manager_root)
                 Dashboard_update = True
                 
             case "5":
                 break
             case "6":
-                print(Fore.GREEN + ":D Hasta pronto..." + Style.RESET_ALL)
+                print(":D Hasta pronto...")
+                return True
+            
 
-def print_dashboard_resources(summary_resources):
+def get_summary_all(manager_root):
 
-    instance_on = f"{summary_resources["instance_on"]:>3}"
-    instance_off = f"{summary_resources["instance_off"]:>3}"
-    sg_total = f"{summary_resources["sg_total"]:>3}"
-    key_pairs_total = f"{summary_resources["key_pairs_total"]:>3}"
-
-    ec2_dashboard = f"{Style.BRIGHT}EC2{Style.RESET_ALL} : {instance_on} Activas / {instance_off} Inactivas"
-    sg_dashboard = f"{Style.BRIGHT}SG{Style.RESET_ALL}: {sg_total}"
-    key_pairs_dashboard = f"{Style.BRIGHT}Key Pairs{Style.RESET_ALL}: {key_pairs_total}"
-
-    print("\t\t╒══════════════════════════════════════════════════════════════╕")
-    print(f"\t\t│ {ec2_dashboard} | {sg_dashboard} | {key_pairs_dashboard} │")
-    print("\t\t╘══════════════════════════════════════════════════════════════╛")
-
-def get_summary_all(manager):
-
-    instance_on,instance_off = manager.ec2.summary_ec2()
-    sg_total = manager.security_groups.summary_sg()
-    key_pairs_total = manager.key_pair.summary_key_pairs()
+    instance_on,instance_off = manager_root.ec2.summary_ec2()
+    sg_total = manager_root.sg.summary_sg()
+    key_pairs_total = manager_root.key_pair.summary_key_pairs()
 
     return {
         "instance_on": instance_on,
