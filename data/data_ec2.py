@@ -1,4 +1,3 @@
-from colorama import init,Style,Fore
 from schemas import DictHeaderRulesSG
 
 VERSION_OS = {
@@ -95,21 +94,21 @@ AWS_REGIONS = {
 
 TYPES_INSTANCES = [
 
-    ["1", "t3.nano", 2, "0.5 GB", "$0.0052", "~$3.74", "✓ Free Tier"],
-    ["2", "t3.micro", 2, "1 GB", "$0.0104", "~$7.49", "✓ Free Tier"],
-    ["3", "t3.small", 2, "2 GB", "$0.0208", "~$14.98", "✓ Free Tier"],
-    ["4", "t3.medium", 2, "4 GB", "$0.0416", "~$29.95", ""],
-    ["5", "c5a.large", 2, "4 GB", "$0.077", "~$55.44", ""],
-    ["6", "t3.large", 2, "8 GB", "$0.0832", "~$59.90", ""],
-    ["7", "c7i-flex.large", 2, "4 GB", "$0.0848", "~$61.06", "✓ Free Tier"],
-    ["8", "m7i-flex.large", 2, "8 GB", "$0.0958", "~$68.98", "✓ Free Tier"],
-    ["9", "c5a.xlarge", 4, "8 GB", "$0.154", "~$110.88", ""],
-    ["10", "t3.xlarge", 4, "16 GB", "$0.1664", "~$119.81", ""],
-    ["11", "c5a.2xlarge", 8, "16 GB", "$0.308", "~$221.76", ""],
-    ["12", "t3.2xlarge", 8, "32 GB", "$0.3328", "~$239.62", ""],
-    ["13", "c5a.4xlarge", 16, "32 GB", "$0.616", "~$443.52", ""],
-    ["14", "c5a.12xlarge", 48, "96 GB", "$1.848", "~$1,330.56", ""],
-    ["15", "c5a.24xlarge", 96, "192 GB", "$3.696", "~$2,661.12", ""]
+    ["1", "t3.nano", "2", "0.5 GB", "$0.0052", "~$3.74", "✓ Free Tier"],
+    ["2", "t3.micro", "2", "1 GB", "$0.0104", "~$7.49", "✓ Free Tier"],
+    ["3", "t3.small", "2", "2 GB", "$0.0208", "~$14.98", "✓ Free Tier"],
+    ["4", "t3.medium", "2", "4 GB", "$0.0416", "~$29.95", ""],
+    ["5", "c5a.large", "2", "4 GB", "$0.077", "~$55.44", ""],
+    ["6", "t3.large", "2", "8 GB", "$0.0832", "~$59.90", ""],
+    ["7", "c7i-flex.large", "2", "4 GB", "$0.0848", "~$61.06", "✓ Free Tier"],
+    ["8", "m7i-flex.large", "2", "8 GB", "$0.0958", "~$68.98", "✓ Free Tier"],
+    ["9", "c5a.xlarge","4", "8 GB", "$0.154", "~$110.88", ""],
+    ["10", "t3.xlarge", "4", "16 GB", "$0.1664", "~$119.81", ""],
+    ["11", "c5a.2xlarge", "8", "16 GB", "$0.308", "~$221.76", ""],
+    ["12", "t3.2xlarge", "8", "32 GB", "$0.3328", "~$239.62", ""],
+    ["13", "c5a.4xlarge", "16", "32 GB", "$0.616", "~$443.52", ""],
+    ["14", "c5a.12xlarge", "48", "96 GB", "$1.848", "~$1,330.56", ""],
+    ["15", "c5a.24xlarge", "96", "192 GB", "$3.696", "~$2,661.12", ""]
 ]
 
 pameter_operation_ec2 = {
@@ -118,7 +117,16 @@ pameter_operation_ec2 = {
     "5": ("🛑-Deteniendo instancia","stopped","✅-Instancia detenenida correctamente."),
     "6": ("🗑️-Eliminando instancia","terminated","✅-Instancia terminada correctamente.")
 }    
-    
+
+colors_state = {
+    "running":  "[green]● Running[/green]",
+    "stopped": "[red]● Stopped[/red]", 
+    "terminated": "[red]● Terminated[/red]",  
+    "pending": "[cyan]● Pending[/cyan]",
+    "stopping": "[yellow]● Stopping[/yellow]",  
+    "shutting-down": "[red]● Shutting-Down[/red]",
+}
+
 OS_AVALIBLE = [
     ["1","Amazon Linux","x86_64"],
     ["2","Ubuntu","x86_64"],
@@ -134,75 +142,36 @@ dict_os_general = {sub[0]:sub[1] for sub in OS_AVALIBLE}
 
 
 """
-Encabezados y titulos para tabulate
+Encabezados y titulos para rich
 """
 
-headers_types_ec2 =  {"header": [Style.BRIGHT + "INDICE",
+headers_types_ec2 =  {"header": ["INDICE",
                                  "Instancia",
-                                 "vCPU","RAM",
+                                 "vCPU",
+                                 "RAM",
                                  "$/hora",
                                  "$/mes",
-                                  "Free Tier" + Style.RESET_ALL],
+                                 "Free Tier"],
                     "title": "\tTipos de instancias disponibles y costes"}
 
-header_region_name = {"header" :[Style.BRIGHT + "INDICE",
-                                     "Location Name",
-                                     "Region ID" + Style.RESET_ALL],
-                     "title": "   Regiones disponibles para administrar"}
-
-header_dashboard = {"header": [Style.BRIGHT+"Account ID",
-                               "ARN","Location Name",
-                               "Region Name" + Style.RESET_ALL],
-
-                    "title": "\t\t\tDatos asociados a su cuenta de AWS"}
-
-header_key_pair = {"header" : [Style.BRIGHT + "ID list",
-                      "Key name",
-                      "Key Pair ID",
-                      "Create Time" + Style.RESET_ALL],
-                  "title": "\t\tLlaves SSH existentes"}
-
-header_sg = {"header":  [Style.BRIGHT + "INDICE",
-                        "SG ID",
-                        "Descripcion" + Style.RESET_ALL],
-            "title":    "\t\t\tGrupos de seguridad existentes"}
-
-header_rules_sg:DictHeaderRulesSG = {"header" : [Style.BRIGHT + "INDICE",
-                                "Protocolo",
-                                "Puerto inicio",
-                                "Puerto fin",
-                                "CDIR IP",
-                                "Descripción" + Style.RESET_ALL],
-                    "title_ingress": "\t\t\t\tReglas de entrada existentes ",
-                    "title_egress": "\t\t\t\tReglas de salida existentes "}
-
-header_ec2 = {"header" : [Style.BRIGHT +"INDICE",
-                          "Nombre EC2",
-                          "Tipo de instancia",
-                          "Estado","Arquitectura",
-                          "ID instancia",
-                          "IP publica",
-                          "Fecha de lanzamiento" +Style.RESET_ALL],
-            "title": "\t\t\t\t\t\tlistado y descripción de instancias"}
-
-header_os_general = {"header" :[Style.BRIGHT + "INDICE",
+header_os_general = {"header" :["INDICE",
                                 "DISTRO",
-                                "ARQUITECTURA" + Style.RESET_ALL],
+                                "ARQUITECTURA" ],
                     "title": "Seleccione el tipo de sistema operativo que desea desplegar :"}
 
-header_os_version = {"header":[Style.BRIGHT + "INDICE",
-                                    "Distros",
-                                    "Arquitectura",
-                                    "Distribuidor" + Style.RESET_ALL],
-                     "title": "Versiones del sistema operativo seleccionado : "}
+header_os_version = {"header":["INDICE",
+                               "Distros",
+                               "Arquitectura",
+                               "Distribuidor" ],
+                    "title": "Versiones del sistema operativo seleccionado : "}
 
-header_selected_ami = {"header": [Style.BRIGHT + "INDICE",
-                                      "ID AMI",
-                                      "Name ",
-                                      "Architecture",
-                                      "Free tier",
-                                      "Date creation" + Style.RESET_ALL],
-                      "title": "\t\t\tAMIS disponible :"}
+header_selected_ami = {"header": ["INDICE",
+                                  "ID AMI",
+                                  "Name ",
+                                  "Architecture",
+                                  "Free tier",
+                                  "Date creation"],
+                      "title": "AMIS disponible :"}
 
 
 """
