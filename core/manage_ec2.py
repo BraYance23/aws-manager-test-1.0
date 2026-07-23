@@ -2,6 +2,7 @@ import logging
 import  time
 import boto3
 from botocore.exceptions import ClientError,NoCredentialsError,WaiterError
+from data.data_ec2 import colors_state
 
 
 logger = logging.getLogger(__name__)
@@ -136,7 +137,7 @@ class ManageEc2:
 
     def format_data_ec2(self,response:dict)-> tuple[dict,list]:
 
-        filas_tabulate = []
+        list_rows = []
         dict_id_ec2 = {}
 
         for indice,reservation in enumerate(response["Reservations"],start=1):
@@ -144,23 +145,25 @@ class ManageEc2:
             for instance in reservation["Instances"]:
                 dict_id_ec2[str(indice)] = (instance.get("InstanceId"))
                 fecha = instance.get("LaunchTime")
-                fecha_formateada = fecha.strftime("%Y/%m/%d %H:%M:%S")                              
+                fecha_formateada = fecha.strftime("%Y/%m/%d %H:%M:%S")
+                instance_state = instance["State"].get("Name")
+                instance_state_color = colors_state.get(instance_state,instance_state)
                 nombre = "Sin nombre"
-                
+             
                 for tag in instance.get("Tags",[]):
                     if tag.get("Key") == "Name":
                         nombre = tag.get("Value","Sin Nombre")
                         break
 
-            filas_tabulate.append([indice,
+            list_rows.append([str(indice),
                                    nombre,
                                    instance.get("InstanceType"),
-                                   instance["State"].get("Name"),
+                                   instance_state_color,
                          instance.get("Architecture"),instance.get("InstanceId"),
                          instance.get("PublicIpAddress","Sin ip publica"),
                          fecha_formateada
                          ])
-        return dict_id_ec2,filas_tabulate
+        return dict_id_ec2,list_rows
       
     def waiter_for_state(self, instance_id: str, target_state: str) -> bool:
 

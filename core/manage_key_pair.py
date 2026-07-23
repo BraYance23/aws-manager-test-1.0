@@ -28,7 +28,7 @@ class ManageKeyPairs:
       
     def format_data(self,response:dict)-> tuple[dict,list]:
         
-        filas_tabulate = []
+        list_rows = []
         dict_key_id = {}
 
         for indice,key in enumerate(response["KeyPairs"],start=1):
@@ -38,14 +38,14 @@ class ManageKeyPairs:
 
             dict_key_id[str(indice)] = key.get("KeyName",None)
 
-            filas_tabulate.append([
-                indice,
+            list_rows.append([
+                str(indice),
                 key.get("KeyName","Sin llave"),
                 key.get("KeyPairId",None),
                 fecha_formateada
             ])
     
-        return dict_key_id,filas_tabulate
+        return dict_key_id,list_rows
 
     def generate_key_pair(self, key_name:str)-> tuple[bool,str]:
 

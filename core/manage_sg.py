@@ -30,8 +30,8 @@ class ManageSecurityGroup:
 
     def formata_data_sg_rules(self,response:dict)-> DictFormatSGRules:
 
-        filas_tabulate_ingress = []
-        filas_tabulate_egress = []
+        list_rows_ingress = []
+        list_rows_egress = []
         dict_rules_ingress = {}
         dict_rules_egress = {}
 
@@ -50,10 +50,10 @@ class ManageSecurityGroup:
                                     "Description": ip_ranges.get("Description","Sin descipcion.")}]
                                     }
                             
-                    filas_tabulate_ingress.append([indice,
+                    list_rows_ingress.append([str(indice),
                                     rule.get("IpProtocol","Sin protocolo").upper(),
-                                    rule.get("FromPort","ALL"),
-                                    rule.get("ToPort","ALL"),
+                                    str(rule.get("FromPort","ALL")),
+                                    str(rule.get("ToPort","ALL")),
                                     ip_ranges.get("CidrIp","Sin CidrIp"),
                                     ip_ranges.get("Description","Sin descripción")
                                     ])
@@ -71,18 +71,18 @@ class ManageSecurityGroup:
                                         "Description": ip_ranges_egress.get("Description","Sin descipcion.")}]
                                         }
                         
-                        filas_tabulate_egress.append([indice,
+                        list_rows_egress.append([str(indice),
                                         rule_egress.get("IpProtocol","Sin protocolo").upper(),
-                                        rule_egress.get("FromPort","ALL"),
-                                        rule_egress.get("ToPort","ALL"),
+                                        str(rule_egress.get("FromPort","ALL")),
+                                        str(rule_egress.get("ToPort","ALL")),
                                         ip_ranges_egress.get("CidrIp","Sin CidrIp"),
                                         ip_ranges_egress.get("Description","Sin descripción")
                                         ])
 
 
         return {
-            "filas_tabulate_ingress": filas_tabulate_ingress,
-            "filas_tabulate_egress": filas_tabulate_egress,
+            "list_rows_ingress": list_rows_ingress,
+            "list_rows_egress": list_rows_egress,
             "dict_rules_ingress": dict_rules_ingress,
             "dict_rules_egress": dict_rules_egress
             }
@@ -90,18 +90,18 @@ class ManageSecurityGroup:
     def format_data_sg_general(self,response:dict)-> tuple[list,dict]:
 
         dict_sg_id = {}
-        filas_tabulate = []
+        list_rows = []
 
         for indice,valor in enumerate(response["SecurityGroups"],start=1):
 
-            filas_tabulate.append([
-                indice,
+            list_rows.append([
+                str(indice),
                 valor.get("GroupId"),
                 valor.get("Description")
             ])
             dict_sg_id[str(indice)] = valor.get("GroupId")
         
-        return filas_tabulate,dict_sg_id
+        return list_rows,dict_sg_id
 
     def authorize_rule_ingress(self,ip_permissions:dict)-> tuple[bool,dict | str]:
 
