@@ -2,7 +2,7 @@ import threading
 import logging
 from ui.messages import print_message,spinner,handle_aws_error
 from controllers.deploy_flow import build_instance_config
-from ui import prompt_general,tables,helpers
+from ui import prompt_general,tables
 from data import data_ec2
 
 
@@ -14,14 +14,33 @@ class EC2Controller:
         self.manager_root = manager_root
         pass
 
+    def wait_with_spinner(self,msg_init,msg_succes,instance_id,target_state):
 
+        stop_spinner = threading.Event()
+        hilo_spinner = threading.Thread(target=spinner,args=(stop_spinner,msg_init))
+        hilo_spinner.start()
+
+        try:
+            correct_operation = self.manager_root.ec2.waiter_for_state(instance_id,target_state)                
+        finally:
+            stop_spinner.set()
+            hilo_spinner.join()
+
+        if not correct_operation:
+                        print_message(f"No se pudo verificar el estado de la instancia, por favor validar en |1-Listar instancias",style_message="red italic")
+                        return False
+        logger.info(f"EC2 desplegado correctamente, ID : {instance_id}")
+        print_message(message=msg_succes,style_message="green italic")
+        return True
+
+         
     def run_ec2(self):
         
         while True:
 
             config_instace = build_instance_config(manager_root=self.manager_root)
-            confirmation = prompt_general.confirmation_config(config_instace,title="Configuracion de instancia a desplegar")
-
+            prompt_general.build_panel_deploy_ec2(data=config_instace)
+            confirmation = prompt_general.confirmation_config(data=config_instace)
             match confirmation:
                  case "cancel":
                       return
@@ -35,23 +54,10 @@ class EC2Controller:
             handle_aws_error(code)
             logger.error(f"Error al lanzar instancia : {code}")
             return
-        
-        stop_spinner = threading.Event()
-        hilo_spinner = threading.Thread(target=spinner,args=(stop_spinner,"Desplegando instancia...","green"))
-        hilo_spinner.start()
-
-        try:
-            correct_operation = self.manager_root.ec2.waiter_for_state(code,"running")                
-        finally:
-            stop_spinner.set()
-            hilo_spinner.join()
-
-        if not correct_operation:
-                        print_message(f"No se pudo verificar el estado de la instancia, por favor validar en |1-Listar instancias",style_message="red italic")
-                        return
-        logger.info(f"EC2 desplegado correctamente, ID : {code}")
-        print_message(message="-Instancia desplegada con exito",style_message="green italic")
-
+        self.wait_with_spinner(msg_init=" 🚀-Desplegando instancia...",
+                                msg_succes="Instancia desplegada con extio\n",
+                                target_state="running",
+                                instance_id=code)
 
     def show_instances(self):
 
@@ -89,9 +95,9 @@ class EC2Controller:
         if instance_id == "cancel":
             return
 
-        mensaje_init,waiter,mensaje_fin = data_ec2.pameter_operation_ec2[selection]
+        msg_init,target_state,msg_finally = data_ec2.pameter_operation_ec2[selection]
         
-        if waiter == "terminated" and  not prompt_general.confirmation():
+        if target_state == "terminated" and  not prompt_general.confirmation():
             print_message("Operacion cancelada por el usuario",style_message="yellow italic")
             return
 
@@ -107,16 +113,7 @@ class EC2Controller:
             handle_aws_error(code)
             return
 
-        stop_spinner = threading.Event()
-        hilo_spinner = threading.Thread(target=spinner,args=(stop_spinner,mensaje_init,"green"))
-        hilo_spinner.start()
-        try:
-            correct_operation = self.manager_root.ec2.waiter_for_state(instance_id,waiter)
-        finally:
-            stop_spinner.set()
-            hilo_spinner.join()
-
-        if not correct_operation:
-                        print_message(f"No se pudo verificar el estado de la instancia, por favor validar en |1-Listar instancias",style_message="red italic")
-                        return
-        print_message(message=mensaje_fin,style_message="green italic")
+        self.wait_with_spinner(msg_init=msg_init,
+                                msg_succes=f"{msg_finally}\n",
+                                target_state=target_state,
+                                instance_id=code)
