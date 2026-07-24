@@ -112,10 +112,10 @@ TYPES_INSTANCES = [
 ]
 
 pameter_operation_ec2 = {
-    "3": ("📟-Iniciando instancia","running","✅-Instancia iniciada correctamente."),
-    "4": ("🔁-Reiniciando instancia","statust_ok","✅-Instancia reiniciada correctamente."),
-    "5": ("🛑-Deteniendo instancia","stopped","✅-Instancia detenenida correctamente."),
-    "6": ("🗑️-Eliminando instancia","terminated","✅-Instancia terminada correctamente.")
+    "3": ("📟 -Iniciando instancia","running","✅-Instancia iniciada correctamente."),
+    "4": ("🔁 -Reiniciando instancia","status_ok","✅-Instancia reiniciada correctamente."),
+    "5": ("🛑 -Deteniendo instancia","stopped","✅-Instancia detenenida correctamente."),
+    "6": ("🗑️ -Eliminando instancia","terminated","✅-Instancia eliminada correctamente.")
 }    
 
 colors_state = {
