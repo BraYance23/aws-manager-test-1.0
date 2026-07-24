@@ -61,7 +61,8 @@ class SGController:
 
         while True:
             ip_permissions = prompt_general.request_ip_permissions(ip_public)
-            confirmation = prompt_general.confirmation_config(data=ip_permissions,title="Regla de entrada a crear")
+            prompt_general.build_panel_rules_sg(data=ip_permissions)
+            confirmation = prompt_general.confirmation_config(data=ip_permissions)
             
             match confirmation:
                 case "confirm":
@@ -88,7 +89,8 @@ class SGController:
 
         while True:
             ip_permissions = prompt_general.request_ip_permissions(ip_public)
-            confirmation = prompt_general.confirmation_config(data=ip_permissions,title="Regla de salida a crear")
+            prompt_general.build_panel_rules_sg(data=ip_permissions)
+            confirmation = prompt_general.confirmation_config(func_panel_data=prompt_general.build_panel_desploy_sg,data=ip_permissions)
             
             match confirmation:
                 case "confirm":
@@ -156,7 +158,7 @@ class SGController:
         self.show_rules_sg(direction)
 
         if not dict_rules:
-            print("No hay reglas existentes.")
+            print_message("No hay reglas existentes.",style_message="yellow italic")
             return
 
         selected_rule = prompt_general.choice_options_table(dict_data=dict_rules,context="de la regla de seguridad que desea eliminar ")

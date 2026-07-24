@@ -2,7 +2,6 @@ import logging
 from ui.messages import print_message,handle_aws_error
 from ui import prompt_general
 from ui import tables
-from ui import helpers
 
 
 logger = logging.getLogger(__name__)
@@ -37,7 +36,7 @@ class KPController:
         dict_key,list_rows = self.manager_root.key_pair.format_data(response)
 
         if not list_rows:
-            print_message(f"[yellow italic]No hay llaves SSH existentes en esta region[/yellow italic] : [bold bright_white]{self.region_name}[/bold bright_white]")
+            print_message(f"[yellow italic]No hay llaves SSH existentes en esta region[/yellow italic] : [bold bright_white]{self.manager_root.region_name}[/bold bright_white]")
             return None
 
         tables.print_table_kp(title="Llaves SSH existentes",list_rows=list_rows)

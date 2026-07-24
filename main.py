@@ -7,9 +7,8 @@ from core.manage_sg import ManageSecurityGroup
 from core.manage_ami import ManageAmi
 from core.manage_ec2 import ManageEc2
 from controllers import menu_services
-from ui.messages import print_message
+from ui.messages import print_message,handle_aws_error
 from ui.tables import select_region_name
-from ui import helpers
 
 
 logging_config.setup_logging()
@@ -41,7 +40,7 @@ def main():
 
             flag,code = manager_root.ec2.verify_identity()
             if not flag:
-                helpers.handle_aws_error(code)
+                handle_aws_error(code)
                 return
             
             account_data = (code["Account"],code["Arn"],location_name,region_name)

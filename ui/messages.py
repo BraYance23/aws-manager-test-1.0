@@ -18,12 +18,13 @@ def print_message_panel(color_panel:str,message:str,style_message:str=""):
     console.print(Align.center(panel))
 
 
-def spinner(stop_event,text_spinner,style_message):
+def spinner(stop_event,text_spinner,):
 
     console = Console()
-    spinnerr = Spinner("dots",text=f"[green]{text_spinner}[/green]",style=style_message)
+    spinnerr = Spinner("dots",text=f"[green]{text_spinner}[/green]",)
   
     spinnerr_center = Align.center(spinnerr)
+    print()
     with Live(spinnerr_center,console=console,refresh_per_second=12):
         while not stop_event.is_set():
             time.sleep(0.3)

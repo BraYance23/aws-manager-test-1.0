@@ -211,7 +211,7 @@ def print_table_ami(list_header:list,title:str,list_rows:list):
     panel = Panel(
         Align.center(table),
         title=f"[bold bright_white]{title}[/bold bright_white]",
-        border_style="blue",
+        border_style="green",
         padding=(1,3),
         expand=False
     )
