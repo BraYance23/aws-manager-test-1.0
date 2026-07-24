@@ -55,22 +55,6 @@ class AmiController:
         print_table_ami(list_header=header,title=title,list_rows=list_rows)
         return prompt_general.choice_options_table(dict_data=dict_ami_id,context="de la AMI ID deseada")
     
-    
-    def formate_data_selected_os(self,election:str)-> tuple[list,dict]:
-
-        dict_distro = {}
-        filas_tabulate = []
-         
-        for indice,valor in enumerate(data_ec2.VERSION_OS[election],start=1):
-            filas_tabulate.append([indice,
-                                  valor,
-                                  "x86_64",
-                                  "AMAZON"
-                                  ])
-            dict_distro[str(indice)] = valor
-            
-        return filas_tabulate,dict_distro
-    
     def get_ami_id(self):
 
         selected_os = self.select_os()
