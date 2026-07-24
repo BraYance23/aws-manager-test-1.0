@@ -3,6 +3,7 @@ from rich.prompt import Prompt
 from rich .table import Table
 from rich.panel import Panel
 from rich.align import Align
+from rich import box
 from typing import Literal
 
 console = Console()
@@ -44,10 +45,9 @@ def choice_options_menu(dict_options:dict)-> str:
             continue
         return choice
     
-def confirmation_config(data:dict,title:str="")-> Literal["confirm","cancel","retry"]:
+def confirmation_config(data:dict)-> Literal["confirm","cancel","retry"]:
 
-    build_panel_desploy_ec2(data=data)
-
+    
     while True:
         print("\n")
         confirmation_user = Prompt.ask(center_text(text="¿Los datos ingresados son correctos? [S/N] | [0] Volver al menú anterior ")).strip().upper()
@@ -74,38 +74,141 @@ def confirmation()-> bool:
 
         return choice == "S"
 
-def build_panel_desploy_ec2(data:dict):
+def build_panel_rules_sg(data:dict):
 
-    type_machine = data["TypeMachine"]
-    ami_id = data["AmiId"]
-    name_instance = data["NameInstance"]
-    key_pair_name = data["KeyPairName"]
-    sg_id = data["SecurityGroupsId"]
-    min_count = data["MinCount"]
-    max_count = data["MaxCount"]
+    ip_protocol = data["IpProtocol"]
+    from_port = data["FromPort"]
+    to_port = data["FromPort"]
+    for value in data["IpRanges"]:
+        cdrip_ip = value["CidrIp"]
+        description = value["Description"]
+
 
     table = Table(
         show_header=False,
-        show_edge=False,
         box=None,
-        padding=(1,2)
+        padding=(0, 2),
+        expand=True
     )
 
-    table.add_column("col1")
-    table.add_row(f"Tipo de maquina : [italic]{type_machine}[/italic]",)
-    table.add_row(f"AMI ID : [italic]{ami_id}")
-    table.add_row(f"Nombre de la instancia : [italic]{name_instance}[/italic]")
-    table.add_row(f"Llave SSH : [italic]{key_pair_name}[/italic]")
-    table.add_row(f"Grupo de seguridad : [italic]{sg_id}[/italic]")
-    table.add_row(f"Minimo de instancias : [italic]{min_count}[/italic]")
-    table.add_row(f"Maximo de instancias : [italic]{max_count}[/italic]")
+    table.add_column(
+        "Campo",
+        style="bold cyan",
+        justify="right",
+        no_wrap=True
+    )
+
+    table.add_column(
+        "Valor",
+        style="white"
+    )
+
+    table.add_row(
+        "Protocolo",
+        f"[dim magenta]{ip_protocol}[/dim magenta]"
+    )
+
+    table.add_row(
+        "Puerto inicio",
+        f"[dim magenta]{from_port}[/dim magenta]"
+    )
+
+    table.add_row(
+        "Puerto fin",
+        f"[dim magenta]{to_port}[/dim magenta]"
+    )
+
+    table.add_row(
+        "Cdrip IP",
+        f"[dim magenta]{cdrip_ip}[/dim magenta]"
+    )
+
+    table.add_row(
+        "Descripcion",
+        f"[dim magenta]{description}[/dim magenta]"
+    )
 
     panel = Panel(
-        Align.center(table),
+        table,
+        title="[bold white]🌐 Datos de regla a crear[/bold white]",
+        title_align="center",
         border_style="blue",
-        title="[bold bright_white]Datos de instancia a desplegar[/bold bright_white]"
-        )
-    console.print(Align.center(panel))
+        box=box.ROUNDED,
+        padding=(1, 2),
+    )
+
+    console.print(
+        Align.center(panel)
+    )
+
+def build_panel_deploy_ec2(data: dict):
+
+    table = Table(
+        show_header=False,
+        box=None,
+        padding=(0, 2),
+        expand=True
+    )
+
+    table.add_column(
+        "Campo",
+        style="bold cyan",
+        justify="right",
+        no_wrap=True
+    )
+
+    table.add_column(
+        "Valor",
+        style="white"
+    )
+
+    table.add_row(
+        "Tipo de máquina",
+        f"[dim magenta]{data['TypeMachine']}[/dim magenta]"
+    )
+
+    table.add_row(
+        "AMI ID",
+        f"[dim magenta]{data['AmiId']}[/dim magenta]"
+    )
+
+    table.add_row(
+        "Nombre de instancia",
+        f"[dim magenta]{data['NameInstance']}[/dim magenta]"
+    )
+
+    table.add_row(
+        "Llave SSH",
+        f"[dim magenta]{data['KeyPairName']}[/dim magenta]"
+    )
+
+    table.add_row(
+        "Grupo de seguridad",
+        f"[dim magenta]{data['SecurityGroupsId']}[/dim magenta]"
+    )
+
+    table.add_row(
+        "Mínimo de instancias",
+        f"[dim magenta]{data['MinCount']}[/dim magenta]"
+    )
+
+    table.add_row(
+        "Máximo de instancias",
+        f"[dim magenta]{data['MaxCount']}[/dim magenta]"
+    )
+
+    panel = Panel(
+        table,
+        title="[bold white]🚀 Datos de instancia a desplegar[/bold white]",
+        title_align="center",
+        border_style="green",
+        box=box.ROUNDED,
+        padding=(1, 2),
+    )
+
+    console.print(
+        Align.center(panel)
+    )
 
 def request_ip_permissions(public_ip:str)-> dict:
 
@@ -124,7 +227,7 @@ def request_ip_permissions(public_ip:str)-> dict:
 
         console.print("El puerto de inicio no puede ser mayor al puerto fin.",style="yellow italic",justify="center")
         continue
-    cidr_ip = Prompt.ask(center_text(text="CIDR IP (ej: 0.0.0.0/0 o ingresa \"1\" para colocar automaticamente su ip publica) "),choices=[]).strip()
+    cidr_ip = Prompt.ask(center_text(text="CIDR IP (ej: 0.0.0.0/0 o ingresa \"1\" para colocar automaticamente su ip publica) ")).strip()
     description = Prompt.ask(center_text(text="Descripción de la regla (opcional) "))
     cidr_ip_finaly = public_ip if cidr_ip == "1" else cidr_ip
     return {
